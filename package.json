@@ -1,0 +1,39 @@
+{
+  "private": true,
+  "name": "lively-javascript",
+  "version": "1.0.0",
+  "description": "Execution and tracking of javascript expressions",
+  "scripts": {
+    "test": "node -r @std/esm tests/index.js",
+    "test:watch": "chokidar \"src/*.js\" -c \"yarn run test\"",
+    "setup": "yarn install --only dev"
+  },
+  "dependencies": {
+    "ast-types": "0.10.1",
+    "bowser": "1.8.1",
+    "escodegen": "1.9.0",
+    "esprima": "4.0.0",
+    "estraverse": "4.2.0",
+    "lodash": "4.17.4",
+    "source-map": "0.6.1"
+  },
+  "devDependencies": {
+    "@std/esm": "^0.22.0",
+    "chokidar-cli": "1.2.0",
+    "eslint": "4.9.0"
+  },
+  "ava": {
+    "source": [
+      "src/**/*.js"
+    ],
+    "require": [
+      "babel-register"
+    ],
+    "babel": "inherit"
+  },
+  "browserslist": [
+    "ie >= 9"
+  ],
+  "author": "Anthony Koch",
+  "license": "MIT"
+}
