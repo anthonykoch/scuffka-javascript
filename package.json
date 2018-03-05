@@ -3,6 +3,7 @@
   "name": "lively-javascript",
   "version": "1.0.0",
   "description": "Execution and tracking of javascript expressions",
+  "main": "lib/index.js",
   "scripts": {
     "test": "node -r @std/esm tests/index.js",
     "test:watch": "chokidar \"src/*.js\" -c \"yarn run test\"",
