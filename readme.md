@@ -4,5 +4,6 @@ Execute JavaScript and track runtime expressions and blocks in node or the brows
 
 ## Todo
 
+- Add some docs
 - Add tests for both node and browser execution. 
 - Add block/path notifiers.
