@@ -3,13 +3,14 @@
   "name": "lively-javascript",
   "version": "1.0.0",
   "description": "Execution and tracking of javascript expressions",
-  "main": "lib/index.js",
+  "main": "./dist/index.js",
   "scripts": {
-    "test": "node -r @std/esm tests/index.js",
-    "test:watch": "chokidar \"src/*.js\" -c \"yarn run test\"",
+    "test": "ava test/*.test.js",
+    "build": "npx babel lib --out-dir dist",
     "setup": "yarn install --only dev"
   },
   "dependencies": {
+    "@babel/core": "^7.0.0-beta.40",
     "ast-types": "0.10.1",
     "bowser": "1.8.1",
     "escodegen": "1.9.0",
@@ -19,18 +20,15 @@
     "source-map": "0.6.1"
   },
   "devDependencies": {
-    "@std/esm": "^0.22.0",
-    "chokidar-cli": "1.2.0",
+    "ava": "0.25.0",
+    "@babel/register": "^7.0.0-beta.40",
+    "@babel/cli": "^7.0.0-beta.40",
     "eslint": "4.9.0"
   },
   "ava": {
-    "source": [
-      "src/**/*.js"
-    ],
     "require": [
-      "babel-register"
-    ],
-    "babel": "inherit"
+      "@babel/register"
+    ]
   },
   "browserslist": [
     "ie >= 9"

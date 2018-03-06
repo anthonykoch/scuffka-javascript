@@ -1,4 +1,8 @@
 # lively-javascript
 
-Execute JavaScfript and track expressions and blacks in node or the browser.
+Execute JavaScript and track runtime expressions and blocks in node or the browser.
 
+## Todo
+
+- Add tests for both node and browser execution. 
+- Add block/path notifiers.
