@@ -1,0 +1,12 @@
+{
+  "presets": [
+    ["@babel/preset-env", {
+      "targets": {
+        "browsers": ["ie >= 10"]
+      }
+    }]
+  ],
+  "plugins": [
+    "@babel/plugin-proposal-optional-chaining"
+  ]
+}

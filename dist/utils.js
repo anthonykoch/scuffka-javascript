@@ -1,23 +1,43 @@
-import assert from 'assert';
-import util from 'util';
-import bowser from 'bowser';
-import { SourceMapConsumer } from 'source-map';
-export const serialize = expr => util.inspect(expr);
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getOriginalErrorPosition = getOriginalErrorPosition;
+exports.getErrorLineFromStack = getErrorLineFromStack;
+exports.getErrorPositionFromStack = getErrorPositionFromStack;
+exports.normalizeError = exports.serialize = void 0;
+
+var _assert = _interopRequireDefault(require("assert"));
+
+var _util = _interopRequireDefault(require("util"));
+
+var _bowser = _interopRequireDefault(require("bowser"));
+
+var _sourceMap = require("source-map");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var serialize = function serialize(expr) {
+  return _util.default.inspect(expr);
+};
 /**
  * Accounts for the iife header newline and 2 firefox specific newlines
  */
 
-const ERROR_FIREFOX_OFFSET = 3;
+
+exports.serialize = serialize;
+var ERROR_FIREFOX_OFFSET = 3;
 /**
  * Accounts for iife header newline and 1 chrome specific newline
  */
 
-const ERROR_CHROME_OFFSET = 2;
+var ERROR_CHROME_OFFSET = 2;
 /**
  * awd
  */
 
-const ERROR_NODE_OFFSET = 1;
+var ERROR_NODE_OFFSET = 1;
 /**
  * This shit is just crazy. I can't even explain it anymore.
  *
@@ -28,24 +48,24 @@ const ERROR_NODE_OFFSET = 1;
  * @return {Error}
  */
 
-export const normalizeError = (err, sourcemap, functionId, env) => {
+var normalizeError = function normalizeError(err, sourcemap, functionId, env) {
   // Handle case where a literal is thrown or if there is no stack to parse
   // or if babel threw an error while parsing, resuling in no sourcemap
   if (err == null || err.stack == null || sourcemap == null) {
     // It's possible for err to not be an actual error object, so we use the Error toString
     // method to create the message.
-    const message = err != null && typeof err.message === 'string' ? Error.prototype.toString.call(err) : String(err);
-    const error = {
+    var message = err != null && typeof err.message === 'string' ? Error.prototype.toString.call(err) : String(err);
+    var _error = {
       stack: null,
       loc: err.loc || null,
-      message,
+      message: message,
       originalMessage: message
     };
-    return error;
+    return _error;
   }
 
-  let loc = err.loc ? err.loc : getOriginalErrorPosition(err, sourcemap, functionId, env);
-  const error = {
+  var loc = err.loc ? err.loc : getOriginalErrorPosition(err, sourcemap, functionId, env);
+  var error = {
     name: err.name,
     stack: err.stack,
     loc: loc,
@@ -54,26 +74,29 @@ export const normalizeError = (err, sourcemap, functionId, env) => {
   };
   return error;
 };
-export function getOriginalErrorPosition(err, sourcemap, functionId, env) {
-  assert(typeof sourcemap === 'string', 'sourcemap should be a string');
-  assert(typeof functionId === 'string', 'functionId should be a string');
-  assert(typeof env === 'string', 'env should be a string');
-  const errorLineText = getErrorLineFromStack(err.stack, functionId, env);
-  const errorPosition = getErrorPositionFromStack(errorLineText);
-  const smc = new SourceMapConsumer(sourcemap); // Firefox for some reason is 1 more than Chrome when doing eval, ffs
 
-  let errorLineOffset = 0; // TODO: Potentially hardcode the line to 1, and remove comments from the AST output
+exports.normalizeError = normalizeError;
 
-  if (bowser.firefox) {
+function getOriginalErrorPosition(err, sourcemap, functionId, env) {
+  (0, _assert.default)(typeof sourcemap === 'string', 'sourcemap should be a string');
+  (0, _assert.default)(typeof functionId === 'string', 'functionId should be a string');
+  (0, _assert.default)(typeof env === 'string', 'env should be a string');
+  var errorLineText = getErrorLineFromStack(err.stack, functionId, env);
+  var errorPosition = getErrorPositionFromStack(errorLineText);
+  var smc = new _sourceMap.SourceMapConsumer(sourcemap); // Firefox for some reason is 1 more than Chrome when doing eval, ffs
+
+  var errorLineOffset = 0; // TODO: Potentially hardcode the line to 1, and remove comments from the AST output
+
+  if (_bowser.default.firefox) {
     errorLineOffset = ERROR_FIREFOX_OFFSET;
-  } else if (bowser.chrome) {
+  } else if (_bowser.default.chrome) {
     errorLineOffset = ERROR_CHROME_OFFSET;
   } else if (env === 'node') {
     errorLineOffset = ERROR_NODE_OFFSET;
   }
 
   if (errorPosition != null) {
-    const pos = smc.originalPositionFor({
+    var pos = smc.originalPositionFor({
       line: errorPosition.line - errorLineOffset,
       // It's minus 1 because things
       column: errorPosition.column - 1
@@ -91,12 +114,13 @@ export function getOriginalErrorPosition(err, sourcemap, functionId, env) {
  * @return {String|null}
  */
 
-export function getErrorLineFromStack(stack, functionId, env) {
-  const lines = stack.split(/\r\n|[\r\n]/);
-  const regExp = new RegExp(functionId);
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]; // if (env === 'node' && /eval/.test(line) && /anonymous/.test(line))
+function getErrorLineFromStack(stack, functionId, env) {
+  var lines = stack.split(/\r\n|[\r\n]/);
+  var regExp = new RegExp(functionId);
+
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i]; // if (env === 'node' && /eval/.test(line) && /anonymous/.test(line))
 
     if (regExp.test(line)) {
       return line;
@@ -105,26 +129,30 @@ export function getErrorLineFromStack(stack, functionId, env) {
 
   return null;
 }
-export function getErrorPositionFromStack(lineText, lineOffset = 0, columnOffset = 0) {
+
+function getErrorPositionFromStack(lineText) {
+  var lineOffset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  var columnOffset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
   if (typeof lineText !== 'string') {
     return null;
   }
 
-  const match = lineText.match(/(\d+):(\d+)\)?$/);
+  var match = lineText.match(/(\d+):(\d+)\)?$/);
 
   if (match == null || !(match.hasOwnProperty(1) && match.hasOwnProperty(2))) {
     return null;
   }
 
-  const line = Number(match[1]) - lineOffset;
-  const column = Number(match[2]) - columnOffset;
+  var line = Number(match[1]) - lineOffset;
+  var column = Number(match[2]) - columnOffset;
 
   if (Number.isNaN(line)) {
     return null;
   }
 
   return {
-    line,
-    column
+    line: line,
+    column: column
   };
 }

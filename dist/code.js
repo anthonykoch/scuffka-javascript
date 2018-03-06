@@ -1,74 +1,87 @@
-// import * as babel from 'babel-standalone';
-// import pluginWrapExpression from './babel-plugin';
-import { normalizeError } from './utils';
+"use strict";
 
-const {
-  VAR_INSPECT,
-  VAR_NOTIFY_BLOCK,
-  VAR_NOTIFY_MEMBER
-} = require('./constants');
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.visit = visit;
+exports.transform = exports.visitors = void 0;
 
-const esprima = require('esprima');
+var _utils = require("./utils");
 
-const escodegen = require('escodegen');
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-const estraverse = require('estraverse');
+var _require = require('./constants'),
+    VAR_INSPECT = _require.VAR_INSPECT,
+    VAR_NOTIFY_BLOCK = _require.VAR_NOTIFY_BLOCK,
+    VAR_NOTIFY_MEMBER = _require.VAR_NOTIFY_MEMBER;
 
-const {
-  builders: t
-} = require('ast-types');
+var esprima = require('esprima');
 
-const IGNORE = Symbol();
+var escodegen = require('escodegen');
+
+var estraverse = require('estraverse');
+
+var _require2 = require('ast-types'),
+    t = _require2.builders;
+
+var IGNORE = Symbol();
 
 function ignore() {
-  for (let i = 0; i < arguments.length; i++) {
+  for (var i = 0; i < arguments.length; i++) {
     arguments[i][IGNORE] = true;
   }
 }
 
-const isIgnored = node => node.hasOwnProperty(IGNORE);
-
-const createLoc = loc => t.objectExpression([t.property('init', t.identifier('start'), t.objectExpression([t.property('init', t.identifier('column'), t.literal(loc.start.line)), t.property('init', t.identifier('line'), t.literal(loc.start.column))])), t.property('init', t.identifier('end'), t.objectExpression([t.property('init', t.identifier('column'), t.literal(loc.start.column)), t.property('init', t.identifier('line'), t.literal(loc.start.line))]))]);
-
-const createPosition = (start, end) => t.objectExpression([t.property('init', t.identifier('start'), t.literal(Number(start))), t.property('init', t.identifier('end'), t.literal(Number(end)))]);
-
-const expressionNotifier = (node, loc) => {
-  return t.callExpression(t.identifier(VAR_INSPECT), [node, // Note: These need to be synced with the tracker's parameters
-  createLoc(node.loc), createPosition(...node.range)]);
+var isIgnored = function isIgnored(node) {
+  return node.hasOwnProperty(IGNORE);
 };
 
-const blockNotifier = () => {
+var createLoc = function createLoc(loc) {
+  return t.objectExpression([t.property('init', t.identifier('start'), t.objectExpression([t.property('init', t.identifier('column'), t.literal(loc.start.line)), t.property('init', t.identifier('line'), t.literal(loc.start.column))])), t.property('init', t.identifier('end'), t.objectExpression([t.property('init', t.identifier('column'), t.literal(loc.start.column)), t.property('init', t.identifier('line'), t.literal(loc.start.line))]))]);
+};
+
+var createPosition = function createPosition(start, end) {
+  return t.objectExpression([t.property('init', t.identifier('start'), t.literal(Number(start))), t.property('init', t.identifier('end'), t.literal(Number(end)))]);
+};
+
+var expressionNotifier = function expressionNotifier(node, loc) {
+  return t.callExpression(t.identifier(VAR_INSPECT), [node, // Note: These need to be synced with the tracker's parameters
+  createLoc(node.loc), createPosition.apply(void 0, _toConsumableArray(node.range))]);
+};
+
+var blockNotifier = function blockNotifier() {
   return t.expressionStatement(t.callExpression(t.identifier(VAR_NOTIFY_BLOCK), []));
 };
 
-const isConsoleLog = expr => {
+var isConsoleLog = function isConsoleLog(expr) {
   return expr.type === 'CallExpression' && expr.callee.type === 'MemberExpression' && expr.callee.object.name === 'console' && expr.callee.property.name === 'log';
 };
 
-const isIdentifier = (expr, name) => expr.type === 'Identifier' && expr.name === name;
+var isIdentifier = function isIdentifier(expr, name) {
+  return expr.type === 'Identifier' && expr.name === name;
+};
 
-const isUndefined = expr => isIdentifier(expr, 'undefined');
+var isUndefined = function isUndefined(expr) {
+  return isIdentifier(expr, 'undefined');
+};
 
-const isLiteral = expr => {
-  const {
-    type
-  } = expr;
+var isLiteral = function isLiteral(expr) {
+  var type = expr.type;
   return type === 'NumericLiteral' || type === 'StringLiteral' || type === 'BooleanLiteral' || type === 'TemplateLiteral' || type === 'RegExpLiteral' || type === 'NullLiteral' || isUndefined(expr) || isIdentifier('NaN');
 };
 
-const isTrackableVariableDeclaration = expr => {
+var isTrackableVariableDeclaration = function isTrackableVariableDeclaration(expr) {
   return expr.type === 'MemberExpression' || expr.type === 'Identifier';
 };
 
-export const visitors = {
-  BlockStatement(node) {
-    const expr = blockNotifier();
+var visitors = {
+  BlockStatement: function BlockStatement(node) {
+    var expr = blockNotifier();
     ignore(expr);
     node.body.unshift(expr);
   },
-
-  ExpressionStatement(node) {
-    const expr = node.expression;
+  ExpressionStatement: function ExpressionStatement(node) {
+    var expr = node.expression;
 
     if (isConsoleLog(expr)) {
       // TODO: Grab the contents of the console log
@@ -80,27 +93,27 @@ export const visitors = {
     node.expression = expressionNotifier(expr, expr);
     return node;
   },
-
-  VariableDeclaration(node) {
-    const length = node.declarations.length;
+  VariableDeclaration: function VariableDeclaration(node) {
+    var length = node.declarations.length;
 
     if (isIgnored(node)) {
       return path.skip();
     }
 
-    for (let i = 0; i < length; i++) {
-      const declaration = node.declarations[i];
-      const init = declaration.init;
+    for (var i = 0; i < length; i++) {
+      var declaration = node.declarations[i];
+      var init = declaration.init;
 
       if (init != null && isTrackableVariableDeclaration(init)) {
         declaration.init = expressionNotifier(init, init);
       }
     }
   }
-
 };
-export function visit(node, visitors) {
-  const hasVisitor = visitors.hasOwnProperty(node.type);
+exports.visitors = visitors;
+
+function visit(node, visitors) {
+  var hasVisitor = visitors.hasOwnProperty(node.type);
 
   if (hasVisitor) {
     visitors[node.type](node);
@@ -108,6 +121,7 @@ export function visit(node, visitors) {
 
   return hasVisitor;
 }
+
 ;
 /**
  * @param  {String} input - The input to transform
@@ -116,24 +130,22 @@ export function visit(node, visitors) {
  * @return {Object}
  */
 
-export const transform = (input, options) => {
-  const {
-    scriptType = 'module'
-  } = options;
+var transform = function transform(input, options) {
+  var _options$scriptType = options.scriptType,
+      scriptType = _options$scriptType === void 0 ? 'module' : _options$scriptType;
 
   try {
-    const fn = scriptType === 'module' ? 'parseModule' : 'parseScript';
-    const ast = esprima[fn](input, {
+    var fn = scriptType === 'module' ? 'parseModule' : 'parseScript';
+    var ast = esprima[fn](input, {
       range: true,
       loc: true
     });
     estraverse.replace(ast, {
-      enter(node, parent) {
+      enter: function enter(node, parent) {
         visit(node, visitors);
       }
-
     });
-    const output = escodegen.generate(ast, {
+    var output = escodegen.generate(ast, {
       format: {
         indent: {
           style: ''
@@ -154,7 +166,7 @@ export const transform = (input, options) => {
       map: output.map.toString()
     });
   } catch (err) {
-    const error = {
+    var error = {
       name: err.name,
       loc: {
         line: err.lineNumber,
@@ -163,10 +175,12 @@ export const transform = (input, options) => {
       stack: err.stack,
       message: err.message
     };
-    const finalError = normalizeError(error, null, null, null);
+    var finalError = (0, _utils.normalizeError)(error, null, null, null);
     return {
       error: finalError,
       originalError: err
     };
   }
 };
+
+exports.transform = transform;
