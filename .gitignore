@@ -1,8 +1,9 @@
 # Any project defined ignores below
 
 .DS_Store
-package-lock.json
+/package-lock.json
 /build
+/lib/testing.js
 
 # Created by https://www.gitignore.io/api/node,sublimetext,visualstudiocode
 
