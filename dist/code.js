@@ -6,7 +6,13 @@ Object.defineProperty(exports, "__esModule", {
 exports.visit = visit;
 exports.transform = exports.visitors = void 0;
 
+var _assert = _interopRequireDefault(require("assert"));
+
 var _utils = require("./utils");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } } function _next(value) { step("next", value); } function _throw(err) { step("throw", err); } _next(); }); }; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
@@ -130,57 +136,98 @@ function visit(node, visitors) {
  * @return {Object}
  */
 
-var transform = function transform(input, options) {
-  var _options$scriptType = options.scriptType,
-      scriptType = _options$scriptType === void 0 ? 'module' : _options$scriptType;
+var transform =
+/*#__PURE__*/
+function () {
+  var _ref = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee(input) {
+    var _ref2,
+        scriptType,
+        filename,
+        ast,
+        fn,
+        error,
+        finalError,
+        output,
+        _args = arguments;
 
-  try {
-    var fn = scriptType === 'module' ? 'parseModule' : 'parseScript';
-    var ast = esprima[fn](input, {
-      range: true,
-      loc: true
-    });
-    estraverse.replace(ast, {
-      enter: function enter(node, parent) {
-        visit(node, visitors);
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            _ref2 = _args.length > 1 && _args[1] !== undefined ? _args[1] : {}, scriptType = _ref2.scriptType, filename = _ref2.filename;
+            (0, _assert.default)(typeof filename === 'string', "{string} options.filename, got ".concat(filename));
+            ast = null;
+            _context.prev = 3;
+            fn = scriptType === 'module' ? 'parseModule' : 'parseScript';
+            ast = esprima[fn](input, {
+              range: true,
+              loc: true
+            });
+            _context.next = 15;
+            break;
+
+          case 8:
+            _context.prev = 8;
+            _context.t0 = _context["catch"](3);
+            error = {
+              name: _context.t0.name,
+              loc: {
+                line: _context.t0.lineNumber,
+                column: _context.t0.column
+              },
+              stack: _context.t0.stack,
+              message: _context.t0.message
+            };
+            _context.next = 13;
+            return (0, _utils.normalizeError)(error, null, null, null);
+
+          case 13:
+            finalError = _context.sent;
+            return _context.abrupt("return", {
+              error: finalError,
+              originalError: _context.t0
+            });
+
+          case 15:
+            estraverse.replace(ast, {
+              enter: function enter(node, parent) {
+                visit(node, visitors);
+              }
+            });
+            output = escodegen.generate(ast, {
+              format: {
+                indent: {
+                  style: ''
+                },
+                space: '',
+                newline: ''
+              },
+              sourceMap: filename,
+              // true or string
+              sourceMapRoot: '/',
+              // Root directory for sourceMap
+              sourceMapWithCode: true,
+              // Set to true to include code AND source map
+              sourceContent: input // If set, embedded in source map as code
+
+            });
+            return _context.abrupt("return", Object.assign({}, output, {
+              map: output.map != undefined ? output.map.toString() : null
+            }));
+
+          case 18:
+          case "end":
+            return _context.stop();
+        }
       }
-    });
-    var output = escodegen.generate(ast, {
-      format: {
-        indent: {
-          style: ''
-        },
-        space: '',
-        newline: ''
-      },
-      sourceMap: options.filename,
-      // true or string
-      sourceMapRoot: '/',
-      // Root directory for sourceMap
-      sourceMapWithCode: true,
-      // Set to true to include code AND source map
-      sourceContent: input // If set, embedded in source map as code
+    }, _callee, this, [[3, 8]]);
+  }));
 
-    });
-    return Object.assign({}, output, {
-      map: output.map.toString()
-    });
-  } catch (err) {
-    var error = {
-      name: err.name,
-      loc: {
-        line: err.lineNumber,
-        column: err.column
-      },
-      stack: err.stack,
-      message: err.message
-    };
-    var finalError = (0, _utils.normalizeError)(error, null, null, null);
-    return {
-      error: finalError,
-      originalError: err
-    };
-  }
-};
+  return function transform(_x) {
+    return _ref.apply(this, arguments);
+  };
+}();
 
 exports.transform = transform;

@@ -5,8 +5,9 @@
   "description": "Execution and tracking of javascript expressions",
   "main": "./dist/index.js",
   "scripts": {
+    "clean": "rm -rf dist/*",
     "test": "ava test/*.test.js",
-    "build": "npx babel lib --out-dir dist",
+    "build": "npm run clean && npx babel lib --out-dir dist --ignore lib/testing.js",
     "setup": "yarn install --only dev"
   },
   "dependencies": {
@@ -19,7 +20,7 @@
     "esprima": "4.0.0",
     "estraverse": "4.2.0",
     "lodash": "4.17.4",
-    "source-map": "0.6.1"
+    "source-map": "^0.7.2"
   },
   "devDependencies": {
     "ava": "0.25.0",

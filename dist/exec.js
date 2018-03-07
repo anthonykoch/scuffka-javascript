@@ -23,6 +23,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } } function _next(value) { step("next", value); } function _throw(err) { step("throw", err); } _next(); }); }; }
+
 var FUNCTION_ID = "LIVELY_INSPECT_".concat((0, _random.default)(1000000, 1999999));
 
 var noop = function noop() {};
@@ -46,19 +48,38 @@ var wrap = function wrap(code, args, _ref) {
 
 exports.wrap = wrap;
 
-var browserExec = function browserExec(input, options) {
-  var _options$args = options.args,
-      args = _options$args === void 0 ? [] : _options$args,
-      _options$parameters = options.parameters,
-      parameters = _options$parameters === void 0 ? [] : _options$parameters,
-      thisBinding = options.thisBinding;
-  var fn = Function(wrap(input, parameters, {
-    id: options.functionId,
-    closure: true
-  }).code)(); // console.log(fn.toString());
+var browserExec =
+/*#__PURE__*/
+function () {
+  var _ref2 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee(input, options) {
+    var _options$args, args, _options$parameters, parameters, thisBinding, fn;
 
-  return fn.call.apply(fn, [thisBinding].concat(_toConsumableArray(args)));
-};
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            _options$args = options.args, args = _options$args === void 0 ? [] : _options$args, _options$parameters = options.parameters, parameters = _options$parameters === void 0 ? [] : _options$parameters, thisBinding = options.thisBinding;
+            fn = Function(wrap(input, parameters, {
+              id: options.functionId,
+              closure: true
+            }).code)(); // console.log(fn.toString());
+
+            return _context.abrupt("return", fn.call.apply(fn, [thisBinding].concat(_toConsumableArray(args))));
+
+          case 3:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee, this);
+  }));
+
+  return function browserExec(_x, _x2) {
+    return _ref2.apply(this, arguments);
+  };
+}();
 /**
  * Executes code in the same environment
  *
@@ -70,27 +91,42 @@ var browserExec = function browserExec(input, options) {
 
 exports.browserExec = browserExec;
 
-var nodeExec = function nodeExec(input, options) {
-  (0, _assert.default)(options, 'options must be an object');
-  var filename = options.filename,
-      _options$args2 = options.args,
-      args = _options$args2 === void 0 ? [] : _options$args2,
-      _options$parameters2 = options.parameters,
-      parameters = _options$parameters2 === void 0 ? [] : _options$parameters2,
-      thisBinding = options.thisBinding,
-      functionId = options.functionId;
-  var wrapper = wrap(input, parameters, {
-    id: functionId
-  }); // console.log('Input:', wrapper.code)
+var nodeExec =
+/*#__PURE__*/
+function () {
+  var _ref3 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee2(input, options) {
+    var filename, _options$args2, args, _options$parameters2, parameters, thisBinding, functionId, wrapper, fn;
 
-  var fn = _vm.default.runInThisContext(wrapper.code, {
-    filename: filename,
-    lineOffset: options.lineOffset,
-    columnOffset: options.columnOffset
-  });
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            (0, _assert.default)(options, 'options must be an object');
+            filename = options.filename, _options$args2 = options.args, args = _options$args2 === void 0 ? [] : _options$args2, _options$parameters2 = options.parameters, parameters = _options$parameters2 === void 0 ? [] : _options$parameters2, thisBinding = options.thisBinding, functionId = options.functionId;
+            wrapper = wrap(input, parameters, {
+              id: functionId
+            });
+            fn = _vm.default.runInThisContext(wrapper.code, {
+              filename: filename,
+              lineOffset: options.lineOffset,
+              columnOffset: options.columnOffset
+            });
+            return _context2.abrupt("return", fn.call.apply(fn, [thisBinding].concat(_toConsumableArray(args))));
 
-  return fn.call.apply(fn, [thisBinding].concat(_toConsumableArray(args)));
-};
+          case 5:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2, this);
+  }));
+
+  return function nodeExec(_x3, _x4) {
+    return _ref3.apply(this, arguments);
+  };
+}();
 
 exports.nodeExec = nodeExec;
 var envs = {
@@ -108,38 +144,73 @@ var envs = {
 
 exports.envs = envs;
 
-var run = function run(input) {
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var _module = options.module,
-      tracker = options.tracker,
-      __filename = options.__filename,
-      __dirname = options.__dirname,
-      _options$env = options.env,
-      env = _options$env === void 0 ? 'browser' : _options$env,
-      _options$functionId = options.functionId,
-      functionId = _options$functionId === void 0 ? FUNCTION_ID : _options$functionId,
-      _options$sourcemap = options.sourcemap,
-      sourcemap = _options$sourcemap === void 0 ? null : _options$sourcemap;
-  var exec = envs[env] || browserExec;
+var run =
+/*#__PURE__*/
+function () {
+  var _ref4 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee3(input) {
+    var options,
+        _module,
+        tracker,
+        __filename,
+        __dirname,
+        _options$env,
+        env,
+        _options$functionId,
+        functionId,
+        _options$sourcemap,
+        sourcemap,
+        exec,
+        error,
+        _args3 = arguments;
 
-  try {
-    exec(input, {
-      functionId: functionId,
-      filename: __filename,
-      parameters: ['exports', 'require', 'module', '__filename', '__dirname', _constants.VAR_INSPECT, _constants.VAR_NOTIFY_BLOCK],
-      args: [_module.exports, _module.require, _module, __filename, __dirname, tracker, noop],
-      thisBinding: _module.exports
-    });
-    return {
-      finish: true
-    };
-  } catch (err) {
-    var error = (0, _utils.normalizeError)(err, sourcemap, functionId, env);
-    return {
-      error: error
-    };
-  }
-};
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            options = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : {};
+            _module = options.module, tracker = options.tracker, __filename = options.__filename, __dirname = options.__dirname, _options$env = options.env, env = _options$env === void 0 ? 'browser' : _options$env, _options$functionId = options.functionId, functionId = _options$functionId === void 0 ? FUNCTION_ID : _options$functionId, _options$sourcemap = options.sourcemap, sourcemap = _options$sourcemap === void 0 ? null : _options$sourcemap;
+            exec = envs.hasOwnProperty(env) ? envs[env] : browserExec;
+            _context3.prev = 3;
+            _context3.next = 6;
+            return exec(input, {
+              functionId: functionId,
+              filename: __filename,
+              parameters: ['exports', 'require', 'module', '__filename', '__dirname', _constants.VAR_INSPECT, _constants.VAR_NOTIFY_BLOCK],
+              args: [_module.exports, _module.require, _module, __filename, __dirname, tracker, noop],
+              thisBinding: _module.exports
+            });
+
+          case 6:
+            return _context3.abrupt("return", {
+              finish: true
+            });
+
+          case 9:
+            _context3.prev = 9;
+            _context3.t0 = _context3["catch"](3);
+            _context3.next = 13;
+            return (0, _utils.normalizeError)(_context3.t0, sourcemap, functionId, env);
+
+          case 13:
+            error = _context3.sent;
+            return _context3.abrupt("return", {
+              error: error
+            });
+
+          case 15:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3, this, [[3, 9]]);
+  }));
+
+  return function run(_x5) {
+    return _ref4.apply(this, arguments);
+  };
+}();
 /**
  * Returns a node module object
  * @param {String} file
