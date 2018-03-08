@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 Object.defineProperty(exports, "transform", {
   enumerable: true,
   get: function get() {
-    return _code.transform;
+    return _transform.transform;
   }
 });
 Object.defineProperty(exports, "browserExec", {
@@ -39,7 +39,7 @@ var constants = _interopRequireWildcard(require("./constants"));
 
 exports.constants = constants;
 
-var _code = require("./code");
+var _transform = require("./transform");
 
 var _exec = require("./exec");
 
