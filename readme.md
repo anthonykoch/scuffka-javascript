@@ -1,6 +1,6 @@
 # lively-javascript
 
-Execute JavaScript and track coverage and runtime expressions in node or the browser.
+Track coverage and runtime expressions for JavaScript executed in node or the browser.
 
 
 ## Todo
