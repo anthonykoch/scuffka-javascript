@@ -131,7 +131,7 @@ function () {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            (0, _assert.default)(typeof sourcemap === 'string', 'sourcemap should be a string');
+            // assert(typeof sourcemap === 'string', 'sourcemap should be a string')
             (0, _assert.default)(typeof functionId === 'string', 'functionId should be a string');
             (0, _assert.default)(typeof env === 'string', 'env should be a string');
             errorLineText = getErrorLineFromStack(err.stack, functionId, env);
@@ -148,32 +148,26 @@ function () {
             }
 
             if (!(errorPosition != null)) {
-              _context2.next = 11;
+              _context2.next = 10;
               break;
             }
 
-            _context2.next = 10;
+            _context2.next = 9;
             return _sourceMap.SourceMapConsumer.with(sourcemap, null, function (consumer) {
               var pos = consumer.originalPositionFor({
-                line: errorPosition.line - errorLineOffset,
+                line: 1,
                 column: errorPosition.column - 1
-              });
-              console.log({
-                errorPosition: errorPosition
-              });
-              console.log({
-                pos: pos
               });
               return pos;
             });
 
-          case 10:
+          case 9:
             return _context2.abrupt("return", _context2.sent);
 
-          case 11:
+          case 10:
             return _context2.abrupt("return", null);
 
-          case 12:
+          case 11:
           case "end":
             return _context2.stop();
         }

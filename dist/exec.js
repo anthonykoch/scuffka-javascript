@@ -152,7 +152,8 @@ function () {
   regeneratorRuntime.mark(function _callee3(input) {
     var options,
         _module,
-        tracker,
+        _options$notifiers,
+        notifiers,
         __filename,
         __dirname,
         _options$env,
@@ -170,15 +171,20 @@ function () {
         switch (_context3.prev = _context3.next) {
           case 0:
             options = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : {};
-            _module = options.module, tracker = options.tracker, __filename = options.__filename, __dirname = options.__dirname, _options$env = options.env, env = _options$env === void 0 ? 'browser' : _options$env, _options$functionId = options.functionId, functionId = _options$functionId === void 0 ? FUNCTION_ID : _options$functionId, _options$sourcemap = options.sourcemap, sourcemap = _options$sourcemap === void 0 ? null : _options$sourcemap;
+            _module = options.module, _options$notifiers = options.notifiers, notifiers = _options$notifiers === void 0 ? {} : _options$notifiers, __filename = options.__filename, __dirname = options.__dirname, _options$env = options.env, env = _options$env === void 0 ? 'browser' : _options$env, _options$functionId = options.functionId, functionId = _options$functionId === void 0 ? FUNCTION_ID : _options$functionId, _options$sourcemap = options.sourcemap, sourcemap = _options$sourcemap === void 0 ? null : _options$sourcemap;
             exec = envs.hasOwnProperty(env) ? envs[env] : browserExec;
             _context3.prev = 3;
             _context3.next = 6;
             return exec(input, {
               functionId: functionId,
               filename: __filename,
-              parameters: ['exports', 'require', 'module', '__filename', '__dirname', _constants.VAR_INSPECT, _constants.VAR_NOTIFY_BLOCK],
-              args: [_module.exports, _module.require, _module, __filename, __dirname, tracker, noop],
+              parameters: ['exports', 'require', 'module', '__filename', '__dirname', _constants.VAR_INSPECT],
+              args: [_module.exports, _module.require, _module, __filename, __dirname, function (id, value) {
+                Array.isArray(notifiers === null || notifiers === void 0 ? void 0 : notifiers.expression) ? notifiers === null || notifiers === void 0 ? void 0 : notifiers.expression.forEach(function (fn) {
+                  fn(id, value);
+                }) : null;
+                return value;
+              }],
               thisBinding: _module.exports
             });
 
