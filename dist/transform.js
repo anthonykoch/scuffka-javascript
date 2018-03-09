@@ -32,7 +32,6 @@ function () {
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee(input) {
     var _ref2,
-        scriptType,
         filename,
         output,
         _instrument,
@@ -45,7 +44,7 @@ function () {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            _ref2 = _args.length > 1 && _args[1] !== undefined ? _args[1] : {}, scriptType = _ref2.scriptType, filename = _ref2.filename;
+            _ref2 = _args.length > 1 && _args[1] !== undefined ? _args[1] : {}, filename = _ref2.filename;
             (0, _assert.default)(typeof filename === 'string', "{string} options.filename, got ".concat(filename));
             output = {};
             _context.prev = 3;
@@ -84,8 +83,8 @@ function () {
             error = {
               name: _context.t0.name,
               loc: {
-                line: _context.t0.lineNumber,
-                column: _context.t0.column
+                line: _context.t0.loc.line,
+                column: _context.t0.loc.column
               },
               stack: _context.t0.stack,
               message: _context.t0.message
