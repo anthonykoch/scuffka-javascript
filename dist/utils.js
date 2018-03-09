@@ -23,23 +23,6 @@ var serialize = function serialize(expr) {
   return _util.default.inspect(expr);
 };
 /**
- * Accounts for the iife header newline and 2 firefox specific newlines
- */
-
-
-exports.serialize = serialize;
-var ERROR_FIREFOX_OFFSET = 3;
-/**
- * Accounts for iife header newline and 1 chrome specific newline
- */
-
-var ERROR_CHROME_OFFSET = 2;
-/**
- * awd
- */
-
-var ERROR_NODE_OFFSET = 1;
-/**
  * This shit is just crazy. I can't even explain it anymore.
  *
  * @param  {Error} err - An error object or mock error object
@@ -48,6 +31,9 @@ var ERROR_NODE_OFFSET = 1;
  * @param  {String} env - The env the code was executed in
  * @return {Error}
  */
+
+
+exports.serialize = serialize;
 
 var normalizeError =
 /*#__PURE__*/
@@ -126,7 +112,7 @@ function () {
   var _ref2 = _asyncToGenerator(
   /*#__PURE__*/
   regeneratorRuntime.mark(function _callee2(err, sourcemap, functionId, env) {
-    var errorLineText, errorPosition, errorLineOffset;
+    var errorLineText, errorPosition;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -135,24 +121,14 @@ function () {
             (0, _assert.default)(typeof functionId === 'string', 'functionId should be a string');
             (0, _assert.default)(typeof env === 'string', 'env should be a string');
             errorLineText = getErrorLineFromStack(err.stack, functionId, env);
-            errorPosition = getErrorPositionFromStack(errorLineText); // Firefox for some reason is 1 more than Chrome when doing eval, ffs
-
-            errorLineOffset = 0; // TODO: Potentially hardcode the line to 1, and remove comments from the AST output
-
-            if (_bowser.default.firefox) {
-              errorLineOffset = ERROR_FIREFOX_OFFSET;
-            } else if (_bowser.default.chrome) {
-              errorLineOffset = ERROR_CHROME_OFFSET;
-            } else if (env === 'node') {
-              errorLineOffset = ERROR_NODE_OFFSET;
-            }
+            errorPosition = getErrorPositionFromStack(errorLineText);
 
             if (!(errorPosition != null)) {
-              _context2.next = 10;
+              _context2.next = 8;
               break;
             }
 
-            _context2.next = 9;
+            _context2.next = 7;
             return _sourceMap.SourceMapConsumer.with(sourcemap, null, function (consumer) {
               var pos = consumer.originalPositionFor({
                 line: 1,
@@ -161,13 +137,13 @@ function () {
               return pos;
             });
 
-          case 9:
+          case 7:
             return _context2.abrupt("return", _context2.sent);
 
-          case 10:
+          case 8:
             return _context2.abrupt("return", null);
 
-          case 11:
+          case 9:
           case "end":
             return _context2.stop();
         }
