@@ -1,5 +1,7 @@
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -7,17 +9,17 @@ exports.getErrorLineFromStack = getErrorLineFromStack;
 exports.getErrorPositionFromStack = getErrorPositionFromStack;
 exports.getOriginalErrorPosition = exports.normalizeError = exports.serialize = void 0;
 
+var _isNan = _interopRequireDefault(require("@babel/runtime/core-js/number/is-nan"));
+
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+
 var _assert = _interopRequireDefault(require("assert"));
 
 var _util = _interopRequireDefault(require("util"));
 
-var _bowser = _interopRequireDefault(require("bowser"));
-
 var _sourceMap = require("source-map");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } } function _next(value) { step("next", value); } function _throw(err) { step("throw", err); } _next(); }); }; }
 
 var serialize = function serialize(expr) {
   return _util.default.inspect(expr);
@@ -38,12 +40,12 @@ exports.serialize = serialize;
 var normalizeError =
 /*#__PURE__*/
 function () {
-  var _ref = _asyncToGenerator(
+  var _ref = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(err, sourcemap, functionId, env) {
+  _regenerator.default.mark(function _callee(err, sourcemap, functionId, env) {
     var message, _error, loc, error;
 
-    return regeneratorRuntime.wrap(function _callee$(_context) {
+    return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
@@ -109,11 +111,11 @@ exports.normalizeError = normalizeError;
 var getOriginalErrorPosition =
 /*#__PURE__*/
 function () {
-  var _ref2 = _asyncToGenerator(
+  var _ref2 = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2(err, sourcemap, functionId, env) {
+  _regenerator.default.mark(function _callee2(err, sourcemap, functionId, env) {
     var errorLineText, errorPosition;
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+    return _regenerator.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
@@ -197,7 +199,7 @@ function getErrorPositionFromStack(lineText) {
   var line = Number(match[1]) - lineOffset;
   var column = Number(match[2]) - columnOffset;
 
-  if (Number.isNaN(line)) {
+  if ((0, _isNan.default)(line)) {
     return null;
   }
 

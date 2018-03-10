@@ -1,9 +1,17 @@
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.createNodeModule = exports.run = exports.envs = exports.nodeExec = exports.browserExec = exports.wrap = void 0;
+
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
 var _vm = _interopRequireDefault(require("vm"));
 
@@ -18,12 +26,6 @@ var _random = _interopRequireDefault(require("lodash/random"));
 var _constants = require("./constants");
 
 var _utils = require("./utils");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } } function _next(value) { step("next", value); } function _throw(err) { step("throw", err); } _next(); }); }; }
 
 var FUNCTION_ID = "LIVELY_INSPECT_".concat((0, _random.default)(1000000, 1999999));
 
@@ -51,12 +53,12 @@ exports.wrap = wrap;
 var browserExec =
 /*#__PURE__*/
 function () {
-  var _ref2 = _asyncToGenerator(
+  var _ref2 = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(input, options) {
+  _regenerator.default.mark(function _callee(input, options) {
     var _options$args, args, _options$parameters, parameters, thisBinding, fn;
 
-    return regeneratorRuntime.wrap(function _callee$(_context) {
+    return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
@@ -66,7 +68,7 @@ function () {
               closure: true
             }).code)(); // console.log(fn.toString());
 
-            return _context.abrupt("return", fn.call.apply(fn, [thisBinding].concat(_toConsumableArray(args))));
+            return _context.abrupt("return", fn.call.apply(fn, [thisBinding].concat((0, _toConsumableArray2.default)(args))));
 
           case 3:
           case "end":
@@ -94,12 +96,12 @@ exports.browserExec = browserExec;
 var nodeExec =
 /*#__PURE__*/
 function () {
-  var _ref3 = _asyncToGenerator(
+  var _ref3 = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2(input, options) {
+  _regenerator.default.mark(function _callee2(input, options) {
     var filename, _options$args2, args, _options$parameters2, parameters, thisBinding, functionId, wrapper, fn;
 
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+    return _regenerator.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
@@ -113,7 +115,7 @@ function () {
               lineOffset: options.lineOffset,
               columnOffset: options.columnOffset
             });
-            return _context2.abrupt("return", fn.call.apply(fn, [thisBinding].concat(_toConsumableArray(args))));
+            return _context2.abrupt("return", fn.call.apply(fn, [thisBinding].concat((0, _toConsumableArray2.default)(args))));
 
           case 5:
           case "end":
@@ -147,9 +149,9 @@ exports.envs = envs;
 var run =
 /*#__PURE__*/
 function () {
-  var _ref4 = _asyncToGenerator(
+  var _ref4 = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee3(input) {
+  _regenerator.default.mark(function _callee3(input) {
     var options,
         _module,
         _options$notifiers,
@@ -166,7 +168,7 @@ function () {
         error,
         _args3 = arguments;
 
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+    return _regenerator.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:

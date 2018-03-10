@@ -1,15 +1,19 @@
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
 
+var _symbol = _interopRequireDefault(require("@babel/runtime/core-js/symbol"));
+
 var _constants = require("./constants");
 
 // Keep in mind
 // https://github.com/latentflip/loupe/blob/master/lib/instrument-code.js
-var IGNORE = Symbol();
+var IGNORE = (0, _symbol.default)();
 
 var isIgnored = function isIgnored(node) {
   return node.hasOwnProperty(IGNORE);
@@ -75,19 +79,7 @@ var _default = function _default(_ref) {
     return t.callExpression(t.identifier(_constants.VAR_INSPECT), [t.numericLiteral(insertionId), node]);
   };
 
-  var blockNotifier = function blockNotifier(type) {
-    var insertionId = addInsertionPoint();
-    return t.expressionStatement(t.callExpression(t.identifier(_constants.VAR_NOTIFY_BLOCK), [t.numericLiteral(insertionId)]));
-  };
-
   var visitors = {
-    BlockStatement: function BlockStatement(path) {// const node = path.node;
-      // const start = blockNotifier(id);
-      // const end = blockNotifier(id);
-      // ignore(start, end);
-      // node.body.unshift(start)
-      // node.body.push(end)
-    },
     ExpressionStatement: function ExpressionStatement(path) {
       var node = path.node;
       var expr = node.expression;

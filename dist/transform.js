@@ -1,9 +1,19 @@
 "use strict";
 
+var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+
+var _assign = _interopRequireDefault(require("@babel/runtime/core-js/object/assign"));
+
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
 var types = _interopRequireWildcard(require("@babel/types"));
 
@@ -19,18 +29,18 @@ var _utils = require("./utils");
 
 var _instrument2 = _interopRequireDefault(require("./instrument"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } } function _next(value) { step("next", value); } function _throw(err) { step("throw", err); } _next(); }); }; }
-
+/**
+ * @param  {String} input - The input to transform
+ * @param  {String} options.scriptType - Either 'module' or 'script'
+ * @param  {String} options.filename - The name of the file
+ * @return {Object}
+ */
 var _default =
 /*#__PURE__*/
 function () {
-  var _ref = _asyncToGenerator(
+  var _ref = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(input) {
+  _regenerator.default.mark(function _callee(input) {
     var _ref2,
         filename,
         output,
@@ -40,7 +50,7 @@ function () {
         finalError,
         _args = arguments;
 
-    return regeneratorRuntime.wrap(function _callee$(_context) {
+    return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
@@ -63,7 +73,7 @@ function () {
               types: types,
               traverse: _traverse.default
             }), insertions = _instrument.insertions;
-            output = Object.assign({}, (0, _generator.default)(output.ast, {
+            output = (0, _assign.default)({}, (0, _generator.default)(output.ast, {
               comments: false,
               sourceMaps: true,
               sourceFileName: filename,
