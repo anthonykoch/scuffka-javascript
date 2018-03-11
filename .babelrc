@@ -2,11 +2,13 @@
   "presets": [
     ["@babel/preset-env", {
       "targets": {
-        "browsers": ["ie >= 10"]
+        "node": "current"
       }
     }]
   ],
   "plugins": [
-    "@babel/plugin-proposal-optional-chaining"
+    "@babel/plugin-proposal-optional-chaining",
+    "@babel/plugin-proposal-object-rest-spread",
+    ["@babel/plugin-transform-runtime", { "babel-polyfill": false, "regenerator": true, }]
   ]
 }
