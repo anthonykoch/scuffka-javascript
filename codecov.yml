@@ -7,5 +7,4 @@ coverage:
   round: down
   precision: 2
 comment:
-  require_changes: no
   layout: "header, diff, flags, files"
