@@ -8,4 +8,4 @@ install:
 script:
   - npm run cov
 after_script:
-  - "cat ./coverage/lcov.info | ./node_modules/.bin/codecove"
+  - "cat ./coverage/lcov.info | ./node_modules/.bin/codecov"
