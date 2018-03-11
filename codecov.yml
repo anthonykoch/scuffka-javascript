@@ -1,0 +1,10 @@
+# https://github.com/http4s/http4s/blob/master/codecov.yml
+# https://github.com/uber-go/zap/blob/master/.codecov.yml
+# https://github.com/codecov/support/wiki/Codecov-Yaml
+# https://gist.github.com/stevepeak/53bee7b2c326b24a9b4a
+coverage:
+  range: 85..100
+  round: down
+  precision: 2
+comment:
+  layout: "header, diff, flags, files, footer"

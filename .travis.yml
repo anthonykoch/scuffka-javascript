@@ -1,11 +1,10 @@
 language: node_js
 node_js:
   - "8"
-  - "9"
 install:
   - npm install -g codecov
   - npm install
 script:
   - npm run cov
 after_script:
-  - "cat ./coverage/lcov.info | ./node_modules/.bin/codecove"
+  - "cat ./coverage/lcov.info | ./node_modules/.bin/codecov"
