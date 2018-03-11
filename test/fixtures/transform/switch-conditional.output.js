@@ -1,1 +1,1 @@
-switch ($$__LE__(0, user.name)) {}
+switch ($$LE__(0), user.name) {}

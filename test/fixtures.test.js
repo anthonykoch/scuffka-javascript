@@ -6,13 +6,23 @@ import createFixtures from './fixtures';
 import transform from '../lib/transform';
 
 test('transform(input)', async t => {
-  const pattern = path.join(__dirname, 'fixtures/transform/!(*.output.js)');
+  const pattern = path.join(__dirname, 'fixtures/transform/!(*.output).js');
 
   const { fixtures, run } = createFixtures(pattern, {
 
     transform:
       async (file) => {
-        return (await transform(file.contents, { filename: 'lively.js' })).code;
+        const output = await transform(file.contents, {
+          filename: 'lively.js',
+          generateOpts: {
+            minified: false,
+            concise: false,
+          }
+        });
+
+        t.is(output.error, null, file.path);
+
+        return output.code;
       },
 
     comparator: {
@@ -25,10 +35,12 @@ test('transform(input)', async t => {
 
   });
 
-  t.plan(fixtures.length);
+  t.plan(fixtures.length * 2);
 
   return run(async (context) => {
     await context.match((actual, expected) => {
+
+      // console.log({actual, expected})
       t.is(actual, expected, context.title);
     });
   });

@@ -7,8 +7,10 @@
   "scripts": {
     "clean": "rm -rf dist/*",
     "test": "ava test/*.test.js",
+    "test:watch": "npm run test -- --watch",
     "build": "npm run clean && npx babel lib --out-dir dist --ignore lib/testing.js",
     "build-browser": "rm -rf build/* && webpack --config webpack.config.js -p",
+    "cov": "npx nyc --reporter=lcov --require @babel/register npm run test",
     "setup": "npm install --only dev"
   },
   "dependencies": {
@@ -19,6 +21,7 @@
     "@babel/preset-env": "7.0.0-beta.40",
     "@babel/runtime": "7.0.0-beta.40",
     "@babel/traverse": "7.0.0-beta.40",
+    "@babel/register": "7.0.0-beta.40",
     "babel-eslint": "8.2.2",
     "babel-loader": "8.0.0-beta.0",
     "check-types": "7.3.0",
@@ -32,10 +35,10 @@
     "@babel/cli": "7.0.0-beta.40",
     "@babel/plugin-proposal-object-rest-spread": "7.0.0-beta.40",
     "@babel/plugin-transform-runtime": "7.0.0-beta.40",
-    "@babel/register": "7.0.0-beta.40",
     "ava": "0.25.0",
     "eslint": "4.9.0",
-    "glob": "7.1.2"
+    "glob": "7.1.2",
+    "nyc": "^11.4.1"
   },
   "ava": {
     "require": [

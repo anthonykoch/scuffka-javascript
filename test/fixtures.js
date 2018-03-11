@@ -81,8 +81,8 @@ export const createContext = (inputFilename, {
     const input = await getInputFile(inputFilename, inputReadOptions);
     const expected = await getComparatorFile(inputFilename, comparator, comparatorReadOptions);
 
-    assert.null(input.error, `Could not find comparator file "${input.path}"`);
-    assert.null(expected.error, `Could not find input file ${expected.path}`);
+    assert.null(input.error, `Could not find input file "${input.path}"`);
+    assert.null(expected.error, `Could not find comparator file ${expected.path}`);
 
     return {
       input,

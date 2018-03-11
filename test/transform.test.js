@@ -7,8 +7,9 @@ test('transform() - throws when filename is not passed', async t => {
 });
 
 test('transform()', async t => {
-  const { code } = await transform('a', { filename: 'lively.js' });
+  const { code, error } = await transform('a', { filename: 'lively.js' });
 
+  t.is(error, null)
   t.is(typeof code, 'string');
 });
 
@@ -19,15 +20,17 @@ test('transform() - returns an error when the transform fails', async t => {
 });
 
 test('transform() - returns sourcemap', async t => {
-  const { map } = await transform('a', { filename: 'lively.js' });
+  const { map, error } = await transform('a', { filename: 'lively.js' });
 
+  t.is(error, null)
   t.true(map != null)
   t.true(typeof map === 'object');
 });
 
 test('transform() - return insertions', async t => {
-  const { insertions } = await transform('a', { filename: 'lively.js' });
+  const { insertions, error } = await transform('a', { filename: 'lively.js' });
 
+  t.is(error, null)
   t.is(insertions.length, 1);
   t.is(insertions[0].loc.start.line, 1);
   t.is(insertions[0].loc.end.line, 1);
