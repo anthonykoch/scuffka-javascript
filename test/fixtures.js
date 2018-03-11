@@ -25,6 +25,7 @@ export const getComparatorFile = (inputFilename, options, readOptions) => {
   let filename = '';
 
   // Attempt to use the resolve function first
+  // eslint-disable-next-line no-undef
   if (check.function(options?.resolve)) {
     filename = options.resolve(inputFilename);
   }
@@ -133,14 +134,14 @@ export default (pattern, options) => {
     inputReadOptions,
     comparator,
     transform,
-    fixture,
-    done,
   } = options;
 
   assert(typeof transform === 'function', `{Function} options.transform, got ${transform}`);
 
   assert(
+      // eslint-disable-next-line no-undef
       typeof comparator?.resolve === 'function',
+      // eslint-disable-next-line no-undef
       `{Function} options.comparator.resolve, got ${comparator?.resolve}`
     )
 
@@ -160,6 +161,7 @@ export default (pattern, options) => {
       );
 
   const run = async (fn, options) => {
+    // eslint-disable-next-line no-undef
     if (options?.parallel) {
       const promises = contexts.map(async (context) => {
         const files = context.getFiles();
