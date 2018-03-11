@@ -113,24 +113,22 @@ var getOriginalErrorPosition =
 function () {
   var _ref2 = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  _regenerator.default.mark(function _callee2(err, sourcemap, functionId, env) {
+  _regenerator.default.mark(function _callee2(err, sourcemap, functionId) {
     var errorLineText, errorPosition;
     return _regenerator.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            // assert(typeof sourcemap === 'string', 'sourcemap should be a string')
             (0, _assert.default)(typeof functionId === 'string', 'functionId should be a string');
-            (0, _assert.default)(typeof env === 'string', 'env should be a string');
-            errorLineText = getErrorLineFromStack(err.stack, functionId, env);
+            errorLineText = getErrorLineFromStack(err.stack, functionId);
             errorPosition = getErrorPositionFromStack(errorLineText);
 
             if (!(errorPosition != null)) {
-              _context2.next = 8;
+              _context2.next = 7;
               break;
             }
 
-            _context2.next = 7;
+            _context2.next = 6;
             return _sourceMap.SourceMapConsumer.with(sourcemap, null, function (consumer) {
               var pos = consumer.originalPositionFor({
                 line: 1,
@@ -139,13 +137,13 @@ function () {
               return pos;
             });
 
-          case 7:
+          case 6:
             return _context2.abrupt("return", _context2.sent);
 
-          case 8:
+          case 7:
             return _context2.abrupt("return", null);
 
-          case 9:
+          case 8:
           case "end":
             return _context2.stop();
         }
@@ -153,7 +151,7 @@ function () {
     }, _callee2, this);
   }));
 
-  return function getOriginalErrorPosition(_x5, _x6, _x7, _x8) {
+  return function getOriginalErrorPosition(_x5, _x6, _x7) {
     return _ref2.apply(this, arguments);
   };
 }();
@@ -167,12 +165,12 @@ function () {
 
 exports.getOriginalErrorPosition = getOriginalErrorPosition;
 
-function getErrorLineFromStack(stack, functionId, env) {
+function getErrorLineFromStack(stack, functionId) {
   var lines = stack.split(/\r\n|[\r\n]/);
   var regExp = new RegExp(functionId);
 
   for (var i = 0; i < lines.length; i++) {
-    var line = lines[i]; // if (env === 'node' && /eval/.test(line) && /anonymous/.test(line))
+    var line = lines[i];
 
     if (regExp.test(line)) {
       return line;
