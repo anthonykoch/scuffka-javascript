@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "description": "Execution and tracking of javascript expressions",
   "main": "./dist/index.js",
+  "engines": {
+    "node": ">=8.0.0"
+  },
   "scripts": {
     "clean": "rm -rf dist/*",
     "test": "ava test/*.test.js",
@@ -16,7 +19,7 @@
   "dependencies": {
     "@babel/core": "7.0.0-beta.40",
     "@babel/generator": "7.0.0-beta.40",
-    "@babel/polyfill": "^7.0.0-beta.40",
+    "@babel/polyfill": "7.0.0-beta.40",
     "@babel/runtime": "7.0.0-beta.40",
     "@babel/traverse": "7.0.0-beta.40",
     "check-types": "7.3.0",
@@ -38,7 +41,7 @@
     "ava": "0.25.0",
     "eslint": "4.9.0",
     "glob": "7.1.2",
-    "nyc": "^11.4.1"
+    "nyc": "11.4.1"
   },
   "ava": {
     "require": [
