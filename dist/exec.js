@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createNodeModule = exports.run = exports.envs = exports.nodeExec = exports.browserExec = exports.wrap = void 0;
+exports.createNodeModule = exports.run = exports.envs = exports.nodeExec = exports.browserExec = exports.wrap = exports.FUNCTION_ID = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
@@ -28,8 +28,7 @@ var _constants = require("./constants");
 var _utils = require("./utils");
 
 var FUNCTION_ID = "LIVELY_INSPECT_".concat((0, _random.default)(1000000, 1999999));
-
-var noop = function noop() {};
+exports.FUNCTION_ID = FUNCTION_ID;
 
 var wrap = function wrap(code, args, _ref) {
   var _ref$id = _ref.id,
@@ -182,7 +181,9 @@ function () {
               filename: __filename,
               parameters: ['exports', 'require', 'module', '__filename', '__dirname', _constants.VAR_INSPECT],
               args: [_module.exports, _module.require, _module, __filename, __dirname, function (id, value) {
-                Array.isArray(notifiers === null || notifiers === void 0 ? void 0 : notifiers.expression) ? notifiers === null || notifiers === void 0 ? void 0 : notifiers.expression.forEach(function (fn) {
+                // eslint-disable-next-line no-undef
+                Array.isArray(notifiers === null || notifiers === void 0 ? void 0 : notifiers.expression) // eslint-disable-next-line no-undef
+                ? notifiers === null || notifiers === void 0 ? void 0 : notifiers.expression.forEach(function (fn) {
                   fn(id, value);
                 }) : null;
                 return value;

@@ -1,0 +1,4 @@
+lib/testing.js
+test/fixtures/**/*.js
+dist
+build

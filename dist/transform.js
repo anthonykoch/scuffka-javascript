@@ -11,7 +11,7 @@ exports.default = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
-var _assign = _interopRequireDefault(require("@babel/runtime/core-js/object/assign"));
+var _extends2 = _interopRequireDefault(require("@babel/runtime/helpers/extends"));
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
@@ -43,9 +43,13 @@ function () {
   _regenerator.default.mark(function _callee(input) {
     var _ref2,
         filename,
-        output,
+        generateOpts,
+        transformOpts,
+        transformOutput,
         _instrument,
         insertions,
+        _err$loc,
+        _err$loc2,
         error,
         finalError,
         _args = arguments;
@@ -54,11 +58,11 @@ function () {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            _ref2 = _args.length > 1 && _args[1] !== undefined ? _args[1] : {}, filename = _ref2.filename;
+            _ref2 = _args.length > 1 && _args[1] !== undefined ? _args[1] : {}, filename = _ref2.filename, generateOpts = _ref2.generateOpts, transformOpts = _ref2.transformOpts;
             (0, _assert.default)(typeof filename === 'string', "{string} options.filename, got ".concat(filename));
-            output = {};
+            transformOutput = {};
             _context.prev = 3;
-            output = (0, _core.transform)(input, {
+            transformOutput = (0, _core.transform)(input, (0, _extends2.default)({
               compact: true,
               // Disabling comments makes it easier to get the line number from run error
               code: false,
@@ -67,25 +71,27 @@ function () {
               filename: filename,
               babelrc: false,
               sourceMaps: true
-            });
+            }, transformOpts));
             _instrument = (0, _instrument2.default)({
-              ast: output.ast,
+              ast: transformOutput.ast,
               types: types,
               traverse: _traverse.default
             }), insertions = _instrument.insertions;
-            output = (0, _assign.default)({}, (0, _generator.default)(output.ast, {
+            return _context.abrupt("return", (0, _extends2.default)({
+              code: null,
+              map: null,
+              error: null
+            }, (0, _generator.default)(transformOutput.ast, (0, _extends2.default)({
               comments: false,
               sourceMaps: true,
               sourceFileName: filename,
               concise: true,
               // minified: true,
               sourceRoot: '/babel/generator'
-            }, input), {
+            }, generateOpts), input), {
               source: input,
               insertions: insertions
-            });
-            _context.next = 16;
-            break;
+            }));
 
           case 9:
             _context.prev = 9;
@@ -93,8 +99,10 @@ function () {
             error = {
               name: _context.t0.name,
               loc: {
-                line: _context.t0.loc.line,
-                column: _context.t0.loc.column
+                // eslint-disable-next-line no-undef
+                line: _context.t0 === null || _context.t0 === void 0 ? void 0 : (_err$loc = _context.t0.loc) === null || _err$loc === void 0 ? void 0 : _err$loc.line,
+                // eslint-disable-next-line no-undef
+                column: _context.t0 === null || _context.t0 === void 0 ? void 0 : (_err$loc2 = _context.t0.loc) === null || _err$loc2 === void 0 ? void 0 : _err$loc2.column
               },
               stack: _context.t0.stack,
               message: _context.t0.message
@@ -105,14 +113,13 @@ function () {
           case 14:
             finalError = _context.sent;
             return _context.abrupt("return", {
+              code: null,
+              map: null,
               error: finalError,
               originalError: _context.t0
             });
 
           case 16:
-            return _context.abrupt("return", output);
-
-          case 17:
           case "end":
             return _context.stop();
         }
