@@ -4,6 +4,7 @@
 /package-lock.json
 /build
 /lib/testing.js
+/coverage.lcov
 
 # Created by https://www.gitignore.io/api/node,sublimetext,visualstudiocode
 

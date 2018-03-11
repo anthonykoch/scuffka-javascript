@@ -6,6 +6,9 @@ install:
   - npm install
 script:
   - npm run cov
+<<<<<<< HEAD
   - npm run lint
+=======
+>>>>>>> 9d7d90e1a81f2ba3c298a24d5f80f28306ed464a
 after_script:
   - "cat ./coverage/lcov.info | ./node_modules/.bin/codecov"
