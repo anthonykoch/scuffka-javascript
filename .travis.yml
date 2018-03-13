@@ -12,4 +12,5 @@ script:
   - npm run cov
   - npm run lint
 after_script:
-  - "cat ./coverage/lcov.info | ./node_modules/.bin/codecov"
+  - cp ./coverage/lcov.info ./lcov.info
+  - codecov
