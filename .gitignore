@@ -1,7 +1,6 @@
 # Any project defined ignores below
 
 .DS_Store
-/package-lock.json
 /build
 /lib/testing.js
 /coverage.lcov
