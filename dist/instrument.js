@@ -13,6 +13,7 @@ var _constants = require("./constants");
 
 // Keep in mind
 // https://github.com/latentflip/loupe/blob/master/lib/instrument-code.js
+// https://github.com/istanbuljs/istanbuljs/blob/master/packages/istanbul-lib-instrument/src/visitor.js
 var IGNORE = (0, _symbol.default)();
 
 var isIgnored = function isIgnored(node) {
@@ -84,10 +85,7 @@ exports.isLiteral = isLiteral;
 
 var isCallable = function isCallable(_ref) {
   var type = _ref.type;
-  return (// type === 'ClassDeclaration'        ||
-    type === 'ClassExpression' || // type === 'FunctionDeclaration'     ||
-    type === 'FunctionExpression' || type === 'ArrowFunctionExpression'
-  );
+  return type === 'ClassExpression' || type === 'FunctionExpression' || type === 'ArrowFunctionExpression';
 };
 
 exports.isCallable = isCallable;
@@ -101,8 +99,11 @@ var _default = function _default(_ref2) {
   var id = -1;
 
   var addInsertionPoint = function addInsertionPoint(node, origin) {
+    var isExpression = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     id += 1;
     insertions.push({
+      type: node.type,
+      isExpression: isExpression,
       id: id,
       // eslint-disable-next-line no-undef
       loc: origin === null || origin === void 0 ? void 0 : origin.loc,
@@ -116,14 +117,14 @@ var _default = function _default(_ref2) {
     return id;
   };
 
-  var trackStatement = function trackStatement(id, node) {
+  var trackStatement = function trackStatement(node) {
     var insertionId = addInsertionPoint(node, node);
     return ignore(t.expressionStatement(t.callExpression(t.identifier(_constants.VAR_INSPECT), [t.numericLiteral(insertionId)])));
   };
 
   var track = function track(node) {
     var forceSequence = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
-    var insertionId = addInsertionPoint(node, node); // console.log('is', node.type, isLiteral(node) || isCallable(node))
+    var insertionId = addInsertionPoint(node, node, true); // console.log('is', node.type, isLiteral(node) || isCallable(node))
 
     if (node.type === 'CallExpression' && node.callee.type === 'Identifier') {
       var identifier = node.callee; // Fixes an issue where a call expression that has an undeclared identifier
