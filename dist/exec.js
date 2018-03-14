@@ -180,12 +180,19 @@ function () {
               functionId: functionId,
               filename: __filename,
               parameters: ['exports', 'require', 'module', '__filename', '__dirname', _constants.VAR_INSPECT],
-              args: [_module.exports, _module.require, _module, __filename, __dirname, function (id, value) {
+              args: [_module.exports, _module.require, _module, __filename, __dirname, function track(id, value) {
                 // eslint-disable-next-line no-undef
-                Array.isArray(notifiers === null || notifiers === void 0 ? void 0 : notifiers.expression) // eslint-disable-next-line no-undef
-                ? notifiers === null || notifiers === void 0 ? void 0 : notifiers.expression.forEach(function (fn) {
-                  fn(id, value);
-                }) : null;
+                if (arguments.hasOwnProperty(1) && Array.isArray(notifiers === null || notifiers === void 0 ? void 0 : notifiers.expression)) {
+                  // eslint-disable-next-line no-undef
+                  notifiers.expression.forEach(function (fn) {
+                    return fn(id, value);
+                  }); // eslint-disable-next-line no-undef
+                } else if (Array.isArray(notifiers === null || notifiers === void 0 ? void 0 : notifiers.statements)) {
+                  notifiers.statements.forEach(function (fn) {
+                    return fn(id);
+                  });
+                }
+
                 return value;
               }],
               thisBinding: _module.exports

@@ -10,3 +10,4 @@ Track coverage and runtime expressions for JavaScript executed in node or the br
 ## Todo
 
 - Add some docs
+- Wrap to inner functions so that someone can't get access to the iifes arguments

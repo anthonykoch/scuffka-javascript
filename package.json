@@ -1,8 +1,8 @@
 {
   "private": true,
   "name": "lively-javascript",
-  "version": "1.0.1",
-  "description": "Execution and tracking of javascript expressions",
+  "version": "1.0.2",
+  "description": "Track coverage and runtime expressions for JavaScript executed in node or the browser.",
   "main": "./dist/index.js",
   "engines": {
     "node": ">=8.0.0"
@@ -28,25 +28,26 @@
     "source-map": "0.7.2"
   },
   "devDependencies": {
-    "webpack": "4.1.1",
-    "webpack-bundle-analyzer": "2.11.1",
-    "webpack-cli": "2.0.10",
-    "babel-eslint": "8.2.2",
-    "babel-loader": "8.0.0-beta.0",
     "@babel/cli": "7.0.0-beta.40",
     "@babel/plugin-proposal-object-rest-spread": "7.0.0-beta.40",
-    "@babel/plugin-transform-runtime": "7.0.0-beta.40",
-    "@babel/register": "7.0.0-beta.40",
-    "@babel/preset-env": "7.0.0-beta.40",
     "@babel/plugin-proposal-optional-chaining": "7.0.0-beta.40",
+    "@babel/plugin-transform-runtime": "7.0.0-beta.40",
+    "@babel/preset-env": "7.0.0-beta.40",
+    "@babel/register": "7.0.0-beta.40",
     "ava": "0.25.0",
+    "babel-eslint": "8.2.2",
+    "babel-loader": "8.0.0-beta.0",
     "eslint": "4.9.0",
     "glob": "7.1.2",
-    "nyc": "11.4.1"
+    "json5": "^1.0.0",
+    "nyc": "11.4.1",
+    "webpack": "4.1.1",
+    "webpack-bundle-analyzer": "2.11.1",
+    "webpack-cli": "2.0.10"
   },
   "ava": {
     "require": [
-      "@babel/register"
+      "./test/register.js"
     ]
   },
   "browserslist": [

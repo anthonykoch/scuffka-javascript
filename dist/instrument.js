@@ -123,7 +123,7 @@ var _default = function _default(_ref2) {
   };
 
   var track = function track(node) {
-    var forceSequence = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+    var forceSequence = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     var insertionId = addInsertionPoint(node, node, true); // console.log('is', node.type, isLiteral(node) || isCallable(node))
 
     if (node.type === 'CallExpression' && node.callee.type === 'Identifier') {
@@ -133,7 +133,7 @@ var _default = function _default(_ref2) {
       node.callee = t.sequenceExpression([t.numericLiteral(0), t.identifier(identifier.name)]);
     }
 
-    if (forceSequence || isLiteral(node) || isCallable(node) || isUnaryVoid(node)) {
+    if (forceSequence || isCallable(node)) {
       // Don't track these since it's redundant information
       return t.sequenceExpression([t.callExpression(t.identifier(_constants.VAR_INSPECT), [t.numericLiteral(insertionId)]), node]);
     } else {
@@ -142,14 +142,20 @@ var _default = function _default(_ref2) {
   };
 
   var visitors = {
+    ConditionalExpression: function ConditionalExpression() {// TODO:
+    },
     ReturnStatement: function ReturnStatement(path) {
-      path.insertBefore(trackStatement(path.node));
+      if (path.node.argument != null) {
+        path.node.argument = track(path.node.argument, false);
+      } else {
+        path.node.argument = track(t.identifier('undefined'), false, path.node);
+      }
     },
     BreakStatement: function BreakStatement(path) {
-      path.insertBefore(trackStatement(path.node));
+      path.insertBefore(trackStatement(path.node, false));
     },
     ContinueStatement: function ContinueStatement(path) {
-      path.insertBefore(trackStatement(path.node));
+      path.insertBefore(trackStatement(path.node, false));
     },
     ForStatement: function ForStatement(path) {
       path.node.test = track(path.node.test);
@@ -161,6 +167,9 @@ var _default = function _default(_ref2) {
           position: path.node.position
         });
       }
+    },
+    ForOfStatement: function ForOfStatement(path) {
+      path.node.right = track(path.node.right);
     },
     DoWhileStatement: function DoWhileStatement(path) {
       var test = path.node.test;
@@ -175,10 +184,10 @@ var _default = function _default(_ref2) {
       }
     },
     WhileStatement: function WhileStatement(path) {
-      path.node.test = track(path.node.test);
+      path.node.test = track(path.node.test, true);
     },
     IfStatement: function IfStatement(path) {
-      path.node.test = track(path.node.test);
+      path.node.test = track(path.node.test, true);
     },
     SwitchStatement: function SwitchStatement(path) {
       path.node.discriminant = track(path.node.discriminant);
@@ -187,8 +196,8 @@ var _default = function _default(_ref2) {
       path.node.test = track(path.node.test);
     },
     LogicalExpression: function LogicalExpression(path) {
-      path.node.left = track(path.node.left);
-      path.node.right = track(path.node.right);
+      path.node.left = track(path.node.left, true);
+      path.node.right = track(path.node.right, true);
     },
     ExpressionStatement: function ExpressionStatement(path) {
       var node = path.node;
@@ -199,7 +208,7 @@ var _default = function _default(_ref2) {
       }
 
       ignore(node);
-      node.expression = track(expr, false);
+      node.expression = track(expr);
     },
     VariableDeclaration: function VariableDeclaration(path) {
       var node = path.node;
@@ -210,7 +219,7 @@ var _default = function _default(_ref2) {
         var init = declaration.init;
 
         if (init != null) {
-          declaration.init = track(init, false);
+          declaration.init = track(init);
         }
       }
     }
