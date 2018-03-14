@@ -1,0 +1,14 @@
+bar + baz;
+bar - baz;
+bar / baz;
+bar * baz;
+bar % baz;
+bar ** baz;
+bar in baz;
+bar instanceof baz;
+bar << baz;
+bar >> baz;
+bar >>> baz;
+bar & baz;
+bar|baz;
+bar^baz;

@@ -1,0 +1,20 @@
+[
+  { id: 0,  type: 'NumericLiteral',   value: '5' },
+  { id: 1,  type: 'NumericLiteral',   value: '10' },
+  { id: 2,  type: 'NumericLiteral',   value: '20' },
+
+  { id: 3,  type: 'BinaryExpression', value: '15' },
+  { id: 4,  type: 'BinaryExpression', value: '-5' },
+  { id: 5,  type: 'BinaryExpression', value: '0.5' },
+  { id: 6,  type: 'BinaryExpression', value: '50' },
+  { id: 7,  type: 'BinaryExpression', value: '5' },
+  { id: 8,  type: 'BinaryExpression', value: '9765625' },
+  { id: 9,  type: 'BinaryExpression', value: '5120' },
+  { id: 10, type: 'BinaryExpression', value: '0' },
+  { id: 11, type: 'BinaryExpression', value: '0' },
+  { id: 12, type: 'BinaryExpression', value: '0' },
+  { id: 13, type: 'BinaryExpression', value: '15' },
+  { id: 14, type: 'BinaryExpression', value: '15' },
+  { id: 15, type: 'BinaryExpression', value: 'false' },
+  { id: 16, type: 'BinaryExpression', value: 'false' },
+]

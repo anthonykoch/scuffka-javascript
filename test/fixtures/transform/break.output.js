@@ -1,4 +1,4 @@
-for (const user of users) {
-  $$LE__(0);
+for (const user of $$LE__(0, users)) {
+  $$LE__(1);
   break;
 }

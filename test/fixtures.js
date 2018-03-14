@@ -51,7 +51,6 @@ export const toTitle = (str) =>
  *
  * @param {string}   inputFilename - The input filename
  * @param {Object}   options.comparator - The comparator options
- * @param {Function} options.transform - Transforms input files to what they are supposed
  * @param {Object}   options.comparatorReadOptions - The fs.readFile options for comparator files
  * @param {Object}   options.inputReadOptions - The fs.readFile optoins for input files
  *
@@ -59,7 +58,6 @@ export const toTitle = (str) =>
  */
 export const createContext = (inputFilename, {
     comparator,
-    transform,
     comparatorReadOptions={ encoding: 'utf8' },
     inputReadOptions={ encoding: 'utf8', },
    }) => {
@@ -69,16 +67,8 @@ export const createContext = (inputFilename, {
   const basename = path.basename(inputFilename, path.extname(inputFilename));
   const title = toTitle(basename);
 
-  // let isRead = false;
-  // let input = null;
-  // let expected;
 
   const getFiles = async () => {
-    // Cache the files so we don't read them multiple times
-    // if (isRead) {
-    //   return { input, expected };
-    // }
-
     const input = await getInputFile(inputFilename, inputReadOptions);
     const expected = await getComparatorFile(inputFilename, comparator, comparatorReadOptions);
 
@@ -99,7 +89,7 @@ export const createContext = (inputFilename, {
       return inputFilename;
     },
 
-    get name() {
+    get basename() {
       return basename;
     },
 
@@ -109,18 +99,10 @@ export const createContext = (inputFilename, {
 
     getFiles,
 
-    async match(compareBy) {
-      assert.function(compareBy, `{Function} compareBy, got ${compareBy}`)
+    async get() {
+      const { input, expected } = await getFiles();
 
-      const { input: ifile, expected: efile } = await getFiles();
-
-      const actual = await transform(ifile);
-      const expected =
-        check.function(comparator?.transform)
-          ? await comparator.transform(efile)
-          : efile.contents;
-
-      return compareBy(actual, expected);
+      return { input: input.contents, comparator: expected.contents };
     },
 
   };
@@ -133,10 +115,7 @@ export default (pattern, options) => {
     comparatorReadOptions,
     inputReadOptions,
     comparator,
-    transform,
   } = options;
-
-  assert(typeof transform === 'function', `{Function} options.transform, got ${transform}`);
 
   assert(
       // eslint-disable-next-line no-undef
@@ -157,10 +136,12 @@ export default (pattern, options) => {
 
   const contexts =
     files.map(inputFilename =>
-        createContext(inputFilename, { inputReadOptions, comparatorReadOptions, comparator, transform, readFile })
+        createContext(inputFilename, { inputReadOptions, comparatorReadOptions, comparator, readFile })
       );
 
-  const run = async (fn, options) => {
+  const run = async function(fn, options) {
+    assert.function(fn, `{Function} fn, got ${typeof fn} "${fn}"`);
+
     // eslint-disable-next-line no-undef
     if (options?.parallel) {
       const promises = contexts.map(async (context) => {
