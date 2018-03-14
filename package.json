@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "lively-javascript",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Execution and tracking of javascript expressions",
   "main": "./dist/index.js",
   "engines": {
