@@ -11,5 +11,4 @@ script:
   - npm run build
   - npm run cov
   - npm run report-coverage
-  - codecov
   - npm run lint
