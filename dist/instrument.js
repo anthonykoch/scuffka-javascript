@@ -29,7 +29,9 @@ function ignore(first) {
 }
 
 var isConsoleLog = function isConsoleLog(expr) {
-  return expr.type === 'CallExpression' && expr.callee.type === 'MemberExpression' && expr.callee.object.name === 'console' && expr.callee.property.name === 'log';
+  var _expr$callee, _expr$callee2, _expr$callee2$object, _expr$callee3, _expr$callee3$propert;
+
+  return expr.type === 'CallExpression' && ((_expr$callee = expr.callee) === null || _expr$callee === void 0 ? void 0 : _expr$callee.type) === 'MemberExpression' && ((_expr$callee2 = expr.callee) === null || _expr$callee2 === void 0 ? void 0 : (_expr$callee2$object = _expr$callee2.object) === null || _expr$callee2$object === void 0 ? void 0 : _expr$callee2$object.name) === 'console' && ((_expr$callee3 = expr.callee) === null || _expr$callee3 === void 0 ? void 0 : (_expr$callee3$propert = _expr$callee3.property) === null || _expr$callee3$propert === void 0 ? void 0 : _expr$callee3$propert.name) === 'log';
 };
 
 exports.isConsoleLog = isConsoleLog;
@@ -53,7 +55,9 @@ var isNaN = function isNaN(expr) {
 exports.isNaN = isNaN;
 
 var isSymbol = function isSymbol(node) {
-  return node.type === 'CallExpression' && node.callee.name === 'Symbol';
+  var _node$callee;
+
+  return node.type === 'CallExpression' && ((_node$callee = node.callee) === null || _node$callee === void 0 ? void 0 : _node$callee.name) === 'Symbol';
 };
 
 exports.isSymbol = isSymbol;
