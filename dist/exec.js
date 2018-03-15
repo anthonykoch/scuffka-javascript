@@ -46,6 +46,14 @@ var wrap = function wrap(code, args, _ref) {
     code: "".concat(header, "\n").concat(code, "\n").concat(footer)
   };
 };
+/**
+ * Executeds code inside an anonymous function.
+ *
+ * @param  {String} input
+ * @param  {Object} options
+ * @return {any} Returns whatever the anonymous function returns.
+ */
+
 
 exports.wrap = wrap;
 
@@ -82,7 +90,7 @@ function () {
   };
 }();
 /**
- * Executes code in the same environment
+ * Executes code in the same environment from where its called.
  *
  * @param  {String} input - The code to execute
  * @param  {Object} options
@@ -135,12 +143,27 @@ var envs = {
   browser: browserExec
 };
 /**
- * Executes the input. If an error occurs, returns the error information, else
- * returns the thing.
+ * Executes input in a a common js style wrapper. The module passed needs two properties,
+ * require and exports, which are used to simulate a common js environment. It does not
+ * wait for setTimeouts or promises to finish before returning.
  *
- * @param  {String} input.code - The code to be executed
- * @param  {Object} [input.map] - The map for the transformed input
- * @param  {Function} tracker
+ * To be notified when a coverage point has been fired, "track" may be passed. "track"
+ * is called with three arguments:
+ *
+ * 1. id - The id of the insertion point
+ * 2. hasValue - Whether or not an expression is being tracked at that location.
+ * 3. value - The runtime value for the expression, may be undefined.
+ *
+ * The env has two option, browser and node. I determines what will be used to execute
+ * the code, either an anonymous function (browser) or the node VM module (node). With
+ * node, the code is executed in the same environment from where it is called from.
+ *
+ * @param  {String} input - The code to be executed
+ * @param  {Object} module
+ * @param  {String} functionId
+ * @param  {String} env - Either 'browser' or 'node'
+ * @param  {Object} [input.sourcemap] - The sourcemap for the input, used to get proper locations from exceptions
+ * @param  {Function[]} [notifiers]
  */
 
 exports.envs = envs;
@@ -153,8 +176,7 @@ function () {
   _regenerator.default.mark(function _callee3(input) {
     var options,
         _module,
-        _options$notifiers,
-        notifiers,
+        track,
         __filename,
         __dirname,
         _options$env,
@@ -172,7 +194,7 @@ function () {
         switch (_context3.prev = _context3.next) {
           case 0:
             options = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : {};
-            _module = options.module, _options$notifiers = options.notifiers, notifiers = _options$notifiers === void 0 ? {} : _options$notifiers, __filename = options.__filename, __dirname = options.__dirname, _options$env = options.env, env = _options$env === void 0 ? 'browser' : _options$env, _options$functionId = options.functionId, functionId = _options$functionId === void 0 ? FUNCTION_ID : _options$functionId, _options$sourcemap = options.sourcemap, sourcemap = _options$sourcemap === void 0 ? null : _options$sourcemap;
+            _module = options.module, track = options.track, __filename = options.__filename, __dirname = options.__dirname, _options$env = options.env, env = _options$env === void 0 ? 'browser' : _options$env, _options$functionId = options.functionId, functionId = _options$functionId === void 0 ? FUNCTION_ID : _options$functionId, _options$sourcemap = options.sourcemap, sourcemap = _options$sourcemap === void 0 ? null : _options$sourcemap;
             exec = envs.hasOwnProperty(env) ? envs[env] : browserExec;
             _context3.prev = 3;
             _context3.next = 6;
@@ -180,17 +202,11 @@ function () {
               functionId: functionId,
               filename: __filename,
               parameters: ['exports', 'require', 'module', '__filename', '__dirname', _constants.VAR_INSPECT],
-              args: [_module.exports, _module.require, _module, __filename, __dirname, function track(id, value) {
-                // eslint-disable-next-line no-undef
-                if (arguments.hasOwnProperty(1) && Array.isArray(notifiers === null || notifiers === void 0 ? void 0 : notifiers.expression)) {
-                  // eslint-disable-next-line no-undef
-                  notifiers.expression.forEach(function (fn) {
-                    return fn(id, value);
-                  }); // eslint-disable-next-line no-undef
-                } else if (Array.isArray(notifiers === null || notifiers === void 0 ? void 0 : notifiers.statements)) {
-                  notifiers.statements.forEach(function (fn) {
-                    return fn(id);
-                  });
+              args: [_module.exports, _module.require, _module, __filename, __dirname, function onCoverageNotification(id, value) {
+                var hasValue = arguments.hasOwnProperty(1);
+
+                if (typeof track === 'function') {
+                  track(id, hasValue, value);
                 }
 
                 return value;
@@ -228,7 +244,8 @@ function () {
   };
 }();
 /**
- * Returns a node module object
+ * Returns a node module object. Only works inside a node environment.
+ *
  * @param {String} file
  * @return {Module}
  */

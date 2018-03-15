@@ -207,7 +207,10 @@ var _default = function _default(_ref2) {
         return;
       }
 
-      ignore(node);
+      ignore(node); // TODO: Maybe add a right side to insertions because `users = []` yields
+      //       `users = [] // []` in lively-browser or maybe just don't track
+      //       the expression?
+
       node.expression = track(expr);
     },
     VariableDeclaration: function VariableDeclaration(path) {
