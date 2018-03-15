@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "lively-javascript",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Track coverage and runtime expressions for JavaScript executed in node or the browser.",
   "main": "./dist/index.js",
   "engines": {
@@ -14,7 +14,8 @@
     "test:watch": "npm run test -- --watch",
     "build": "npm run clean && npx babel lib --out-dir dist --ignore lib/testing.js",
     "build-browser": "rm -rf build/* && webpack --config webpack.config.js -p",
-    "cov": "npx nyc --reporter=lcov --require @babel/register npm run test",
+    "cov": "nyc --reporter=lcov npm run test",
+    "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "setup": "npm install --only dev"
   },
   "dependencies": {

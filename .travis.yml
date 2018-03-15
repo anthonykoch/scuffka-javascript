@@ -10,7 +10,5 @@ install:
 script:
   - npm run build
   - npm run cov
+  - npm run report-coverage
   - npm run lint
-after_script:
-  - cp ./coverage/lcov.info ./lcov.info
-  - codecov
