@@ -85,24 +85,17 @@ test('exec.run() - (fixtures) executes input and calls callbacks ', async t => {
         exports: {},
         require() {},
       },
-      notifiers: {
-        expression: [
-          (id, value) => {
-            actual.push({
-              id,
-              type: output.insertions[id].type,
-              value: inspect(value, { depth: 20 }),
-            });
-          },
-        ],
-        statements: [
-          (id) => {
-            actual.push({
-              id,
-              type: output.insertions[id].type,
-            });
-          },
-        ],
+      track(id, hasValue, value) {
+        const item = {
+          id,
+          type: output.insertions[id].type,
+        };
+
+        if (hasValue) {
+          item.value = inspect(value, { depth: 20 });
+        }
+
+        actual.push(item);
       },
     });
 
