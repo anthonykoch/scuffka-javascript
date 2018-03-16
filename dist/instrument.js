@@ -31,7 +31,10 @@ function ignore(first) {
 var isConsoleLog = function isConsoleLog(expr) {
   var _expr$callee, _expr$callee2, _expr$callee2$object, _expr$callee3, _expr$callee3$propert;
 
-  return expr.type === 'CallExpression' && ((_expr$callee = expr.callee) === null || _expr$callee === void 0 ? void 0 : _expr$callee.type) === 'MemberExpression' && ((_expr$callee2 = expr.callee) === null || _expr$callee2 === void 0 ? void 0 : (_expr$callee2$object = _expr$callee2.object) === null || _expr$callee2$object === void 0 ? void 0 : _expr$callee2$object.name) === 'console' && ((_expr$callee3 = expr.callee) === null || _expr$callee3 === void 0 ? void 0 : (_expr$callee3$propert = _expr$callee3.property) === null || _expr$callee3$propert === void 0 ? void 0 : _expr$callee3$propert.name) === 'log';
+  return expr.type === 'CallExpression' && // eslint-disable-next-line no-undef
+  ((_expr$callee = expr.callee) === null || _expr$callee === void 0 ? void 0 : _expr$callee.type) === 'MemberExpression' && // eslint-disable-next-line no-undef
+  ((_expr$callee2 = expr.callee) === null || _expr$callee2 === void 0 ? void 0 : (_expr$callee2$object = _expr$callee2.object) === null || _expr$callee2$object === void 0 ? void 0 : _expr$callee2$object.name) === 'console' && // eslint-disable-next-line no-undef
+  ((_expr$callee3 = expr.callee) === null || _expr$callee3 === void 0 ? void 0 : (_expr$callee3$propert = _expr$callee3.property) === null || _expr$callee3$propert === void 0 ? void 0 : _expr$callee3$propert.name) === 'log';
 };
 
 exports.isConsoleLog = isConsoleLog;
@@ -102,33 +105,36 @@ var _default = function _default(_ref2) {
   var badLoops = [];
   var id = -1;
 
-  var addInsertionPoint = function addInsertionPoint(node, origin) {
-    var isExpression = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+  var addInsertionPoint = function addInsertionPoint(node) {
+    var isExpression = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    var context = arguments.length > 2 ? arguments[2] : undefined;
     id += 1;
     insertions.push({
       type: node.type,
+      context: context,
       isExpression: isExpression,
       id: id,
       // eslint-disable-next-line no-undef
-      loc: origin === null || origin === void 0 ? void 0 : origin.loc,
+      loc: node.loc,
       position: {
         // eslint-disable-next-line no-undef
-        start: origin === null || origin === void 0 ? void 0 : origin.start,
+        start: node.start,
         // eslint-disable-next-line no-undef
-        end: origin === null || origin === void 0 ? void 0 : origin.end
+        end: node.end
       }
     });
     return id;
   };
 
-  var trackStatement = function trackStatement(node) {
-    var insertionId = addInsertionPoint(node, node);
+  var trackStatement = function trackStatement(node, context) {
+    var insertionId = addInsertionPoint(node, false, context);
     return ignore(t.expressionStatement(t.callExpression(t.identifier(_constants.VAR_INSPECT), [t.numericLiteral(insertionId)])));
   };
 
   var track = function track(node) {
     var forceSequence = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-    var insertionId = addInsertionPoint(node, node, true); // console.log('is', node.type, isLiteral(node) || isCallable(node))
+    var context = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+    var insertionId = addInsertionPoint(node, true, context); // console.log('is', node.type, isLiteral(node) || isCallable(node))
 
     if (node.type === 'CallExpression' && node.callee.type === 'Identifier') {
       var identifier = node.callee; // Fixes an issue where a call expression that has an undeclared identifier
@@ -146,23 +152,26 @@ var _default = function _default(_ref2) {
   };
 
   var visitors = {
+    BlockStatement: function BlockStatement(path) {
+      path.node.body.unshift(trackStatement(path.node, path.parent.type));
+    },
     ConditionalExpression: function ConditionalExpression() {// TODO:
     },
     ReturnStatement: function ReturnStatement(path) {
       if (path.node.argument != null) {
-        path.node.argument = track(path.node.argument, false);
+        path.node.argument = track(path.node.argument, false, 'ReturnStatement');
       } else {
-        path.node.argument = track(t.identifier('undefined'), false, path.node);
+        path.insertBefore(trackStatement(path.node, 'ReturnStatement'));
       }
     },
     BreakStatement: function BreakStatement(path) {
-      path.insertBefore(trackStatement(path.node, false));
+      path.insertBefore(trackStatement(path.node, 'BreakStatement'));
     },
     ContinueStatement: function ContinueStatement(path) {
-      path.insertBefore(trackStatement(path.node, false));
+      path.insertBefore(trackStatement(path.node, 'ContinueStatement'));
     },
     ForStatement: function ForStatement(path) {
-      path.node.test = track(path.node.test);
+      path.node.test = track(path.node.test, false, 'ForStatement.test');
 
       if (path.node.update == null) {
         badLoops.push({
@@ -173,11 +182,11 @@ var _default = function _default(_ref2) {
       }
     },
     ForOfStatement: function ForOfStatement(path) {
-      path.node.right = track(path.node.right);
+      path.node.right = track(path.node.right, false, 'ForOfStatement');
     },
     DoWhileStatement: function DoWhileStatement(path) {
       var test = path.node.test;
-      path.node.test = track(path.node.test);
+      path.node.test = track(path.node.test, false, 'DoWhileStatement');
 
       if (test && test.value === true) {
         badLoops.push({
@@ -188,20 +197,20 @@ var _default = function _default(_ref2) {
       }
     },
     WhileStatement: function WhileStatement(path) {
-      path.node.test = track(path.node.test, true);
+      path.node.test = track(path.node.test, true, 'WhileStatement');
     },
     IfStatement: function IfStatement(path) {
-      path.node.test = track(path.node.test, true);
+      path.node.test = track(path.node.test, true, 'IfStatement');
     },
     SwitchStatement: function SwitchStatement(path) {
-      path.node.discriminant = track(path.node.discriminant);
+      path.node.discriminant = track(path.node.discriminant, false, 'SwitchStatement');
     },
     SwitchCase: function SwitchCase(path) {
-      path.node.test = track(path.node.test);
+      path.node.test = track(path.node.test, false, 'SwitchCase');
     },
     LogicalExpression: function LogicalExpression(path) {
-      path.node.left = track(path.node.left, true);
-      path.node.right = track(path.node.right, true);
+      path.node.left = track(path.node.left, true, 'LogicalExpression');
+      path.node.right = track(path.node.right, true, 'LogicalExpression');
     },
     ExpressionStatement: function ExpressionStatement(path) {
       var node = path.node;
@@ -215,7 +224,7 @@ var _default = function _default(_ref2) {
       //       `users = [] // []` in lively-browser or maybe just don't track
       //       the expression?
 
-      node.expression = track(expr);
+      node.expression = track(expr, false, 'ExpressionStatement');
     },
     VariableDeclaration: function VariableDeclaration(path) {
       var node = path.node;
@@ -226,7 +235,7 @@ var _default = function _default(_ref2) {
         var init = declaration.init;
 
         if (init != null) {
-          declaration.init = track(init);
+          declaration.init = track(init, false, 'VariableDeclaration');
         }
       }
     }
