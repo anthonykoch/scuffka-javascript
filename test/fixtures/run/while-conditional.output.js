@@ -1,3 +1,3 @@
 [
-  { id: 0, type: 'BooleanLiteral' }
+  { id: 0, context: 'WhileStatement', type: 'BooleanLiteral' }
 ]

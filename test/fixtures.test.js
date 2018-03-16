@@ -89,6 +89,7 @@ test('exec.run() - (fixtures) executes input and calls callbacks ', async t => {
         const item = {
           id,
           type: output.insertions[id].type,
+          context: output.insertions[id].context,
         };
 
         if (hasValue) {

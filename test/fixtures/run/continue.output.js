@@ -1,4 +1,5 @@
 [
-  { id: 0, type: 'StringLiteral', value: "'a'", },
-  { id: 1, type: 'ContinueStatement' },
+  { id: 0, context: 'ForOfStatement', type: 'StringLiteral', value: "'a'", },
+  { id: 1, context: 'ForOfStatement', type: 'BlockStatement' },
+  { id: 2, context: 'ContinueStatement', type: 'ContinueStatement' },
 ]
