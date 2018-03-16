@@ -1,3 +1,3 @@
 [
-  { id: 0, type: 'SequenceExpression', value: '2' }
+  { id: 0, context: 'VariableDeclaration', type: 'SequenceExpression', value: '2' }
 ]

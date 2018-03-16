@@ -1,3 +1,3 @@
 [
-  { id: 0, type: 'ThisExpression', value: '{}' },
+  { id: 0, context: 'ExpressionStatement', type: 'ThisExpression', value: '{}' },
 ]

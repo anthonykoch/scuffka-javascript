@@ -1,3 +1,3 @@
 [
-  { id: 0, type: 'NewExpression', value: 'Bar {}' }
+  { id: 0, context: 'VariableDeclaration', type: 'NewExpression', value: 'Bar {}' }
 ]

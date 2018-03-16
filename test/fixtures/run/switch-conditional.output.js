@@ -1,4 +1,4 @@
 [
-  { id: 0, type: 'ObjectExpression', value: "{ name: 'musefan42' }" },
-  { id: 1, type: 'MemberExpression', value: "'musefan42'" },
+  { id: 0, context: 'VariableDeclaration', type: 'ObjectExpression', value: "{ name: 'musefan42' }" },
+  { id: 1, context: 'SwitchStatement', type: 'MemberExpression', value: "'musefan42'" },
 ]
