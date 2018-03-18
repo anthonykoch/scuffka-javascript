@@ -32,8 +32,8 @@ test('transform() - return insertions', async t => {
 
   t.is(error, null)
   t.is(insertions.length, 1);
-  t.is(insertions[0].loc.start.line, 1);
-  t.is(insertions[0].loc.end.line, 1);
-  t.is(insertions[0].position.start, 0);
-  t.is(insertions[0].position.end, 1);
+  t.is(insertions[0].node.loc.start.line, 1);
+  t.is(insertions[0].node.loc.end.line, 1);
+  t.is(insertions[0].node.start, 0);
+  t.is(insertions[0].node.end, 1);
 });
