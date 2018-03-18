@@ -113,15 +113,8 @@ var _default = function _default(_ref2) {
       type: node.type,
       context: context,
       isExpression: isExpression,
-      id: id,
-      // eslint-disable-next-line no-undef
-      loc: node.loc,
-      position: {
-        // eslint-disable-next-line no-undef
-        start: node.start,
-        // eslint-disable-next-line no-undef
-        end: node.end
-      }
+      node: node,
+      id: id
     });
     return id;
   };
