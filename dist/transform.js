@@ -48,6 +48,7 @@ function () {
         transformOutput,
         _instrument,
         insertions,
+        badLoops,
         _err$loc,
         _err$loc2,
         error,
@@ -76,7 +77,7 @@ function () {
               ast: transformOutput.ast,
               types: types,
               traverse: _traverse.default
-            }), insertions = _instrument.insertions;
+            }), insertions = _instrument.insertions, badLoops = _instrument.badLoops;
             return _context.abrupt("return", (0, _extends2.default)({
               code: null,
               map: null,
@@ -90,7 +91,8 @@ function () {
               sourceRoot: '/babel/generator'
             }, generateOpts), input), {
               source: input,
-              insertions: insertions
+              insertions: insertions,
+              badLoops: badLoops
             }));
 
           case 9:

@@ -4,7 +4,6 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 module.exports = {
   entry: {
     bundle: ['@babel/polyfill', './lib/index'],
-    testing: ['./lib/testing.js'],
   },
   module: {
     rules: [
