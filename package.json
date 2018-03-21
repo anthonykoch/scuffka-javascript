@@ -12,8 +12,9 @@
     "clean": "rm -rf dist/*",
     "test": "ava test/*.test.js",
     "test:watch": "npm run test -- --watch",
-    "build": "npm run clean && npx babel lib --out-dir dist --ignore lib/testing.js",
-    "build-browser": "rm -rf build/* && webpack --config webpack.config.js -p",
+    "build": "npm run test && npm run lint && npm run clean && npm run build:browser && npm run build:dist",
+    "build:dist": "babel lib --out-dir dist --ignore lib/testing.js",
+    "build:browser": "rm -rf build/* && webpack --config webpack.config.js -p",
     "cov": "nyc --reporter=lcov npm run test",
     "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "setup": "npm install --only dev"
