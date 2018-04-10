@@ -145,9 +145,6 @@ var _default = function _default(_ref2) {
   };
 
   var visitors = {
-    BlockStatement: function BlockStatement(path) {
-      path.node.body.unshift(trackStatement(path.node, path.parent.type));
-    },
     ConditionalExpression: function ConditionalExpression() {// TODO:
     },
     ReturnStatement: function ReturnStatement(path) {
@@ -164,9 +161,9 @@ var _default = function _default(_ref2) {
       path.insertBefore(trackStatement(path.node, 'ContinueStatement'));
     },
     ForStatement: function ForStatement(path) {
-      path.node.test = track(path.node.test, false, 'ForStatement.test');
+      path.node.test = track(path.node.test, true, 'ForStatement.test');
 
-      if (path.node.update == null) {
+      if (path.node.update == null || path.node.test == null) {
         badLoops.push({
           type: path.node.type,
           loc: path.node.loc,
@@ -220,6 +217,10 @@ var _default = function _default(_ref2) {
       node.expression = track(expr, false, 'ExpressionStatement');
     },
     VariableDeclaration: function VariableDeclaration(path) {
+      if (path.parent.type === 'ForStatement') {
+        return;
+      }
+
       var node = path.node;
       var length = node.declarations.length;
 
