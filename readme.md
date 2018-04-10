@@ -2,7 +2,7 @@
 [![codecov](https://codecov.io/gh/anthonykoch/lively-javascript/branch/master/graph/badge.svg)](https://codecov.io/gh/anthonykoch/lively-javascript)
 
 
-# lively-javascript
+# scuffka-javascript
 
 Track coverage and runtime expressions for JavaScript executed in node or the browser.
 

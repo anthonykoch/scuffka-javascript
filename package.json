@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "lively-javascript",
+  "name": "scuffka-javascript",
   "version": "1.0.6",
   "description": "Track coverage and runtime expressions for JavaScript executed in node or the browser.",
   "main": "./dist/index.js",
