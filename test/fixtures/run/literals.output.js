@@ -5,5 +5,4 @@
   { id: 3, context: 'ExpressionStatement', type: 'NullLiteral',      value: 'null' },
   { id: 4, context: 'ExpressionStatement', type: 'Identifier',       value: 'undefined' },
   { id: 5, context: 'ExpressionStatement', type: 'ArrayExpression',  value: '[]' },
-  { id: 6, context: 'Program', type: 'BlockStatement' },
 ]
