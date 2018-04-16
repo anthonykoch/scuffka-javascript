@@ -8,7 +8,7 @@ import createFixtures, { FixtureContext } from './fixtures';
 import transform from '../lib/transform';
 
 test('transform() - Returns minimally instrumented code', async t => {
-  const pattern = path.join(__dirname, 'fixtures/transform/!(*.output).js');
+  const pattern = path.join(__dirname, 'fixtures/instrument-minimal/!(*.output).js');
 
   const { fixtures, run } = createFixtures(pattern, {
 

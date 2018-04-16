@@ -8,7 +8,7 @@ import createFixtures from './fixtures';
 import transform from '../lib/transform';
 
 test('transform() - Returns thoroughly instrumented code', async t => {
-  const pattern = path.join(__dirname, 'fixtures/transform-thorough/!(*.output).js');
+  const pattern = path.join(__dirname, 'fixtures/instrument-thorough/!(*.output).js');
 
   const { fixtures, run } = createFixtures(pattern, {
 

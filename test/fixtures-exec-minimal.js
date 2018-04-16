@@ -11,7 +11,7 @@ import transform from '../lib/transform';
 import * as exec from '../lib/exec';
 
 test('exec.run() - (fixtures) executes input and calls callbacks ', async t => {
-  const pattern = path.join(__dirname, 'fixtures/run/!(*.output).js');
+  const pattern = path.join(__dirname, 'fixtures/exec-minimal/!(*.output).js');
 
   const { fixtures, run } = createFixtures(pattern, {
 
