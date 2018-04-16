@@ -1,3 +1,4 @@
+// @flow
 // Loosely based off https://github.com/unional/fixture
 
 import fs from 'fs';
@@ -5,43 +6,27 @@ import path from 'path';
 import util from 'util';
 
 import glob from 'glob';
-import check, { assert } from 'check-types';
+import { assert } from 'check-types';
 
 const readFilePromise = util.promisify(fs.readFile);
 
-export const readFile = (filename, readOptions) => {
-  return readFilePromise(filename, readOptions)
+type ReadFileOptions = {
+  encoding?: string
+};
+
+type VinylFile = {
+  contents: string | null,
+  path: string,
+  error: Error | null,
+};
+
+export const readFile = (filename: string, options: ReadFileOptions): Promise<VinylFile> => {
+  return readFilePromise(filename, options)
     .then(contents => ({ path: filename, contents, error: null, }))
     .catch(error => ({ path: filename, contents: null, error }));
 };
 
-export const getInputFile = (filename, readOptions) => {
-  return readFile(filename, readOptions);
-};
-
-export const getComparatorFile = (inputFilename, options, readOptions) => {
-  assert.string(inputFilename, `{string} inputFilename, got ${inputFilename}`);
-
-  let filename = '';
-
-  // Attempt to use the resolve function first
-  // eslint-disable-next-line no-undef
-  if (check.function(options?.resolve)) {
-    filename = options.resolve(inputFilename);
-  }
-
-  if (check.not.string(filename)) {
-    return {
-      path: filename,
-      contents: null,
-      error: new Error('Invalid filename'),
-    };
-  }
-
-  return readFile(filename, readOptions);
-};
-
-export const toTitle = (str) =>
+export const toTitle = (str: string) =>
   str.toLowerCase()
     .replace(/\W+|\s+/g, ' ')
     .replace(/^\w|( \w)/g, match => match.toUpperCase());
@@ -49,80 +34,77 @@ export const toTitle = (str) =>
 /**
  * Creates a fixture context, which holds data about the
  *
- * @param {string}   inputFilename - The input filename
- * @param {Object}   options.comparator - The comparator options
- * @param {Object}   options.comparatorReadOptions - The fs.readFile options for comparator files
- * @param {Object}   options.inputReadOptions - The fs.readFile optoins for input files
- *
- * @return {Object}
+ * @param {string} inputFilename - The input filename
+ * @param {Object} options.comparator - The comparator options
+ * @param {Object} options.comparatorReadOptions - The fs.readFile options for comparator files
+ * @param {Object} options.inputReadOptions - The fs.readFile optoins for input files
  */
-export const createContext = (inputFilename, {
-    comparator,
+
+ export class FixtureContext {
+
+  inputFilename: string;
+  title: string;
+  path: string;
+  basename: string;
+  resolveComparator: (filename: string) => string;
+  comparatorReadOptions: ReadFileOptions;
+  inputReadOptions: ReadFileOptions;
+
+  constructor(inputFilename: string, {
+    resolveComparator,
     comparatorReadOptions={ encoding: 'utf8' },
     inputReadOptions={ encoding: 'utf8', },
-   }) => {
+  }: {
+    resolveComparator: (filename: string) => string,
+    comparatorReadOptions: ReadFileOptions,
+    inputReadOptions: ReadFileOptions
+  }) {
+    const basename = path.basename(inputFilename, path.extname(inputFilename));
 
-  assert.string(inputFilename, `{string} inputFilename, got ${inputFilename}`);
+    this.inputFilename = inputFilename;
+    this.title = toTitle(basename);
+    this.inputReadOptions = inputReadOptions;
+    this.comparatorReadOptions = comparatorReadOptions;
+    this.path = inputFilename;
+    this.basename = basename;
+    this.resolveComparator = resolveComparator;
+  }
 
-  const basename = path.basename(inputFilename, path.extname(inputFilename));
-  const title = toTitle(basename);
+  async getFiles() {
+    const input = await readFile(this.inputFilename, this.inputReadOptions);
 
+    const comparator =
+      await readFile(this.resolveComparator(this.inputFilename), this.comparatorReadOptions);
 
-  const getFiles = async () => {
-    const input = await getInputFile(inputFilename, inputReadOptions);
-    const expected = await getComparatorFile(inputFilename, comparator, comparatorReadOptions);
-
-    assert.null(input.error, `Could not find input file "${input.path}"`);
-    assert.null(expected.error, `Could not find comparator file ${expected.path}`);
+    assert(input.error == null, `Could not find input file "${input.path}"`);
+    assert(comparator.error == null, `Could not find comparator file ${comparator.path}`);
 
     return {
       input,
-      expected,
+      comparator,
     };
-  };
+  }
 
-  return {
+  async get(): Promise<{ input: string, comparator: string }> {
+    const { input, comparator } = await this.getFiles();
 
-    toTitle,
+    return {
+      input: String(input.contents),
+      comparator: String(comparator.contents),
+    };
+  }
+}
 
-    get path() {
-      return inputFilename;
-    },
-
-    get basename() {
-      return basename;
-    },
-
-    get title() {
-      return title;
-    },
-
-    getFiles,
-
-    async get() {
-      const { input, expected } = await getFiles();
-
-      return { input: input.contents, comparator: expected.contents };
-    },
-
-  };
-};
-
-export default (pattern, options) => {
-  assert.object(options, `{Object} options, got ${options}`);
-
+export default (pattern: string, options: {
+    resolve: (filename: string) => string,
+    inputReadOptions?: ReadFileOptions,
+    comparatorReadOptions?: ReadFileOptions,
+  }) => {
   const {
-    comparatorReadOptions,
-    inputReadOptions,
-    comparator,
+    comparatorReadOptions={},
+    inputReadOptions={},
+    resolve,
   } = options;
-
-  assert(
-      // eslint-disable-next-line no-undef
-      typeof comparator?.resolve === 'function',
-      // eslint-disable-next-line no-undef
-      `{Function} options.comparator.resolve, got ${comparator?.resolve}`
-    )
 
   const files =
     glob.sync(pattern, { ...glob })
@@ -136,15 +118,17 @@ export default (pattern, options) => {
 
   const contexts =
     files.map(inputFilename =>
-        createContext(inputFilename, { inputReadOptions, comparatorReadOptions, comparator, readFile })
+        new FixtureContext(inputFilename, {
+          resolveComparator: resolve,
+          inputReadOptions,
+          comparatorReadOptions,
+          readFile,
+        })
       );
 
-  const run = async function(fn, options) {
-    assert.function(fn, `{Function} fn, got ${typeof fn} "${fn}"`);
-
-    // eslint-disable-next-line no-undef
-    if (options?.parallel) {
-      const promises = contexts.map(async (context) => {
+  const run = async function (fn: Function, options: { parallel?: boolean }={}) {
+    if (options.parallel) {
+      const promises = contexts.map(async (context: FixtureContext) => {
         const files = context.getFiles();
 
         await fn(context, files);

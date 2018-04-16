@@ -1,0 +1,14 @@
+$$LE__(0, $$LE__(0, bar) + $$LE__(1, baz));
+$$LE__(1, $$LE__(0, bar) - $$LE__(1, baz));
+$$LE__(2, $$LE__(0, bar) / $$LE__(1, baz));
+$$LE__(3, $$LE__(0, bar) * $$LE__(1, baz));
+$$LE__(4, $$LE__(0, bar) % $$LE__(1, baz));
+$$LE__(5, $$LE__(0, bar) ** $$LE__(1, baz));
+$$LE__(6, $$LE__(0, bar) in $$LE__(1, baz));
+$$LE__(7, $$LE__(0, bar) instanceof $$LE__(1, baz));
+$$LE__(8, $$LE__(0, bar) << $$LE__(1, baz));
+$$LE__(9, $$LE__(0, bar) >> $$LE__(1, baz));
+$$LE__(10, $$LE__(0, bar) >>> $$LE__(1, baz));
+$$LE__(11, $$LE__(0, bar) & $$LE__(1, baz));
+$$LE__(12, $$LE__(0, bar) | $$LE__(1, baz));
+$$LE__(13, $$LE__(0, bar) ^ $$LE__(1, baz));

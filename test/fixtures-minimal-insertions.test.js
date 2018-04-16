@@ -1,3 +1,5 @@
+// @flow
+
 import path from 'path';
 import { inspect } from 'util';
 
@@ -8,53 +10,12 @@ import createFixtures from './fixtures';
 import transform from '../lib/transform';
 import * as exec from '../lib/exec';
 
-test('transform(input) - (fixtures) Returns instrumented code', async t => {
-  const pattern = path.join(__dirname, 'fixtures/transform/!(*.output).js');
-
-  const { fixtures, run } = createFixtures(pattern, {
-
-    comparator: {
-
-      resolve(filename) {
-        return filename.replace(/\.js$/, '.output.js');
-      },
-
-    },
-
-  });
-
-  t.plan(fixtures.length * 2);
-
-  return run(async (context) => {
-    const { input, comparator } = await context.get();
-
-    const output = await transform(input, {
-      filename: 'lively.js',
-      generateOpts: {
-        minified: false,
-        concise: false,
-      }
-    });
-
-    t.is(output.error, null, context.basename);
-
-    const actual = output.code;
-    const expected = comparator;
-
-    t.is(actual, expected, 'transform/' + context.basename);
-  });
-});
-
 test('exec.run() - (fixtures) executes input and calls callbacks ', async t => {
   const pattern = path.join(__dirname, 'fixtures/run/!(*.output).js');
 
   const { fixtures, run } = createFixtures(pattern, {
 
-    comparator: {
-
-      resolve: (filename) => filename.replace(/\.js$/, '.output.js'),
-
-    },
+    resolve: (filename) => filename.replace(/\.js$/, '.output.js'),
 
   });
 
@@ -64,7 +25,7 @@ test('exec.run() - (fixtures) executes input and calls callbacks ', async t => {
     const { input, comparator } = await context.get();
 
     const output = await transform(input, {
-      filename: 'lively.js',
+      filename: 'main.js',
       generateOpts: {
         minified: false,
         concise: false,
@@ -73,26 +34,29 @@ test('exec.run() - (fixtures) executes input and calls callbacks ', async t => {
 
     t.is(output.error, null, context.path);
 
+    const result = ((output: any): TransformSuccess);
+
     let actual = [];
 
-    await exec.run(output.code, {
-      sourcemap: output.sourcemap,
+    await exec.run(result.code, {
+      sourcemap: result.map,
       functionId: 'LivelyJS',
       env: 'browser',
-      __dirname: 'lively',
-      __filename: 'lively.js',
+      __dirname: 'main',
+      __filename: 'main.js',
       module: {
         exports: {},
         require() {},
       },
-      track(id, hasValue, value) {
+      track(id: number, hasValue: boolean, value: any) {
         const item = {
           id,
-          type: output.insertions[id].type,
-          context: output.insertions[id].context,
+          type: result.insertions[id].type,
+          context: result.insertions[id].context,
         };
 
         if (hasValue) {
+          // $FlowFixMe
           item.value = inspect(value, { depth: 20 });
         }
 
@@ -106,7 +70,6 @@ test('exec.run() - (fixtures) executes input and calls callbacks ', async t => {
       expected = JSON5.parse(comparator);
     }, context.path);
 
-    // console.log({name: context.basename, actual, expected})
     t.deepEqual(actual, expected, 'run/' + context.basename);
   });
 });

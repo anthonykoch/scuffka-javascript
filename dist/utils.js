@@ -6,8 +6,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.getErrorLineFromStack = getErrorLineFromStack;
-exports.getErrorPositionFromStack = getErrorPositionFromStack;
-exports.getOriginalErrorPosition = exports.normalizeError = exports.serialize = void 0;
+exports.getErrorPositionFromStack = exports.getOriginalErrorPosition = exports.normalizeError = exports.serialize = void 0;
 
 var _isNan = _interopRequireDefault(require("@babel/runtime/core-js/number/is-nan"));
 
@@ -20,6 +19,8 @@ var _assert = _interopRequireDefault(require("assert"));
 var _util = _interopRequireDefault(require("util"));
 
 var _sourceMap = require("source-map");
+
+var _exec = require("./exec");
 
 var serialize = function serialize(expr) {
   return _util.default.inspect(expr);
@@ -43,7 +44,7 @@ function () {
   var _ref = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
   _regenerator.default.mark(function _callee(err, sourcemap, functionId, env) {
-    var message, _error, loc, error;
+    var _message, _error, loc, error;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -56,12 +57,12 @@ function () {
 
             // It's possible for err to not be an actual error object, so we use the Error toString
             // method to create the message.
-            message = err != null && typeof err.message === 'string' ? Error.prototype.toString.call(err) : String(err);
+            _message = err != null && typeof err.message === 'string' ? Error.prototype.toString.call(err) : String(err);
             _error = {
               stack: null,
               loc: err.loc || null,
-              message: message,
-              originalMessage: message
+              message: _message,
+              originalMessage: _message
             };
             return _context.abrupt("return", _error);
 
@@ -119,16 +120,15 @@ function () {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            (0, _assert.default)(typeof functionId === 'string', 'functionId should be a string');
             errorLineText = getErrorLineFromStack(err.stack, functionId);
             errorPosition = getErrorPositionFromStack(errorLineText);
 
             if (!(errorPosition != null)) {
-              _context2.next = 7;
+              _context2.next = 6;
               break;
             }
 
-            _context2.next = 6;
+            _context2.next = 5;
             return _sourceMap.SourceMapConsumer.with(sourcemap, null, function (consumer) {
               var pos = consumer.originalPositionFor({
                 line: 1,
@@ -137,13 +137,13 @@ function () {
               return pos;
             });
 
-          case 6:
+          case 5:
             return _context2.abrupt("return", _context2.sent);
 
-          case 7:
+          case 6:
             return _context2.abrupt("return", null);
 
-          case 8:
+          case 7:
           case "end":
             return _context2.stop();
         }
@@ -170,17 +170,17 @@ function getErrorLineFromStack(stack, functionId) {
   var regExp = new RegExp(functionId);
 
   for (var i = 0; i < lines.length; i++) {
-    var line = lines[i];
+    var _line = lines[i];
 
-    if (regExp.test(line)) {
-      return line;
+    if (regExp.test(_line)) {
+      return _line;
     }
   }
 
   return null;
 }
 
-function getErrorPositionFromStack(lineText) {
+var getErrorPositionFromStack = function getErrorPositionFromStack(lineText) {
   var lineOffset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
   var columnOffset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
@@ -194,8 +194,8 @@ function getErrorPositionFromStack(lineText) {
     return null;
   }
 
-  var line = Number(match[1]) - lineOffset;
-  var column = Number(match[2]) - columnOffset;
+  var line = Number(match[1]) + lineOffset;
+  var column = Number(match[2]) + columnOffset;
 
   if ((0, _isNan.default)(line)) {
     return null;
@@ -205,4 +205,6 @@ function getErrorPositionFromStack(lineText) {
     line: line,
     column: column
   };
-}
+};
+
+exports.getErrorPositionFromStack = getErrorPositionFromStack;
