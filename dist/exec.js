@@ -27,6 +27,7 @@ var _constants = require("./constants");
 
 var _utils = require("./utils");
 
+// $FlowFixMe
 var FUNCTION_ID = "LIVELY_INSPECT_".concat((0, _random.default)(1000000, 1999999));
 exports.FUNCTION_ID = FUNCTION_ID;
 
@@ -71,7 +72,8 @@ function () {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            _options$args = options.args, args = _options$args === void 0 ? [] : _options$args, _options$parameters = options.parameters, parameters = _options$parameters === void 0 ? [] : _options$parameters, thisBinding = options.thisBinding;
+            _options$args = options.args, args = _options$args === void 0 ? [] : _options$args, _options$parameters = options.parameters, parameters = _options$parameters === void 0 ? [] : _options$parameters, thisBinding = options.thisBinding; // $FlowFixMe
+
             fn = Function(wrap(input, parameters, {
               id: options.functionId,
               closure: true
@@ -162,12 +164,12 @@ var defaultExecutor = browserExec;
  * the code, either an anonymous function (browser) or the node VM module (node). With
  * node, the code is executed in the same environment from where it is called from.
  *
- * @param  {String} input - The code to be executed
- * @param  {Object} module
- * @param  {String} functionId
- * @param  {String} env - Either 'browser' or 'node'
- * @param  {Object} [input.sourcemap] - The sourcemap for the input, used to get proper locations from exceptions
- * @param  {Function[]} [notifiers]
+ * @param input - The code to be executed
+ * @param options.module
+ * @param options.functionId
+ * @param options.env - Either 'browser' or 'node'
+ * @param options.sourcemap - The sourcemap for the input, used to get proper locations from exceptions
+ * @param options.notifiers
  */
 
 exports.defaultExecutor = defaultExecutor;
@@ -177,26 +179,17 @@ var run =
 function () {
   var _ref4 = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  _regenerator.default.mark(function _callee3(input) {
-    var _ref5,
-        _module,
-        track,
-        __filename,
-        __dirname,
-        _ref5$env,
-        env,
-        _ref5$functionId,
-        functionId,
-        sourcemap,
-        exec,
-        error,
-        _args3 = arguments;
+  _regenerator.default.mark(function _callee3(input, options) {
+    var _options$module, _module, track, __filename, __dirname, _options$env, env, _options$functionId, functionId, sourcemap, exec;
 
     return _regenerator.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            _ref5 = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : {}, _module = _ref5.module, track = _ref5.track, __filename = _ref5.__filename, __dirname = _ref5.__dirname, _ref5$env = _ref5.env, env = _ref5$env === void 0 ? 'browser' : _ref5$env, _ref5$functionId = _ref5.functionId, functionId = _ref5$functionId === void 0 ? FUNCTION_ID : _ref5$functionId, sourcemap = _ref5.sourcemap;
+            _options$module = options.module, _module = _options$module === void 0 ? {
+              require: function require() {},
+              exports: {}
+            } : _options$module, track = options.track, __filename = options.__filename, __dirname = options.__dirname, _options$env = options.env, env = _options$env === void 0 ? 'browser' : _options$env, _options$functionId = options.functionId, functionId = _options$functionId === void 0 ? FUNCTION_ID : _options$functionId, sourcemap = options.sourcemap;
             exec = executors.hasOwnProperty(env) ? executors[env] : defaultExecutor;
             _context3.prev = 2;
             _context3.next = 5;
@@ -218,19 +211,21 @@ function () {
 
           case 5:
             return _context3.abrupt("return", {
-              finish: true
+              finish: true,
+              error: null
             });
 
           case 8:
             _context3.prev = 8;
             _context3.t0 = _context3["catch"](2);
             _context3.next = 12;
-            return (0, _utils.normalizeError)(_context3.t0, sourcemap, functionId, env);
+            return (0, _utils.normalizeError)(_context3.t0, sourcemap, functionId);
 
           case 12:
-            error = _context3.sent;
+            _context3.t1 = _context3.sent;
             return _context3.abrupt("return", {
-              error: error
+              finish: false,
+              error: _context3.t1
             });
 
           case 14:
@@ -241,14 +236,14 @@ function () {
     }, _callee3, this, [[2, 8]]);
   }));
 
-  return function run(_x5) {
+  return function run(_x5, _x6) {
     return _ref4.apply(this, arguments);
   };
 }();
 /**
  * Returns a node module object. Only works inside a node environment.
  *
- * @param {String} file
+ * @param file
  * @return {Module}
  */
 

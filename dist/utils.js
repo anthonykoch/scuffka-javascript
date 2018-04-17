@@ -8,19 +8,13 @@ Object.defineProperty(exports, "__esModule", {
 exports.getErrorLineFromStack = getErrorLineFromStack;
 exports.getErrorPositionFromStack = exports.getOriginalErrorPosition = exports.normalizeError = exports.serialize = void 0;
 
-var _isNan = _interopRequireDefault(require("@babel/runtime/core-js/number/is-nan"));
-
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
-var _assert = _interopRequireDefault(require("assert"));
-
 var _util = _interopRequireDefault(require("util"));
 
 var _sourceMap = require("source-map");
-
-var _exec = require("./exec");
 
 var serialize = function serialize(expr) {
   return _util.default.inspect(expr);
@@ -28,11 +22,9 @@ var serialize = function serialize(expr) {
 /**
  * This shit is just crazy. I can't even explain it anymore.
  *
- * @param  {Error} err - An error object or mock error object
- * @param  {SourceMap} sourcemap - a sourcemap object
- * @param  {String} functionId - The name of the iife that executed the code.
- * @param  {String} env - The env the code was executed in
- * @return {Error}
+ * @param err - An error object or mock error object
+ * @param sourcemap - a sourcemap object
+ * @param functionId - The name of the iife that executed the code.
  */
 
 
@@ -43,50 +35,55 @@ var normalizeError =
 function () {
   var _ref = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
-  _regenerator.default.mark(function _callee(err, sourcemap, functionId, env) {
-    var _message, _error, loc, error;
+  _regenerator.default.mark(function _callee(err, sourcemap, functionId) {
+    var name, originalLoc, message, _error, loc, error;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            if (!(err == null || err.stack == null || sourcemap == null)) {
-              _context.next = 4;
+            name = err ? err.name : null;
+            originalLoc = err ? err.loc : null; // Handle case where a literal is thrown or if there is no stack to parse
+            // or if babel threw an error while parsing, resuling in no sourcemap
+
+            if (!(functionId == null || err == null || err.stack == null || sourcemap == null)) {
+              _context.next = 6;
               break;
             }
 
             // It's possible for err to not be an actual error object, so we use the Error toString
             // method to create the message.
-            _message = err != null && typeof err.message === 'string' ? Error.prototype.toString.call(err) : String(err);
+            message = err != null && typeof err.message === 'string' ? Error.prototype.toString.call(err) : String(err);
             _error = {
+              name: name,
               stack: null,
-              loc: err.loc || null,
-              message: _message,
-              originalMessage: _message
+              loc: originalLoc,
+              message: message,
+              originalMessage: message
             };
             return _context.abrupt("return", _error);
 
-          case 4:
+          case 6:
             if (!err.loc) {
-              _context.next = 8;
+              _context.next = 10;
               break;
             }
 
             _context.t0 = err.loc;
-            _context.next = 11;
+            _context.next = 13;
             break;
 
-          case 8:
-            _context.next = 10;
-            return getOriginalErrorPosition(err, sourcemap, functionId, env);
-
           case 10:
+            _context.next = 12;
+            return getOriginalErrorPosition(err, sourcemap, functionId);
+
+          case 12:
             _context.t0 = _context.sent;
 
-          case 11:
+          case 13:
             loc = _context.t0;
             error = {
-              name: err.name,
+              name: name,
               stack: err.stack,
               loc: loc,
               message: err.message,
@@ -94,7 +91,7 @@ function () {
             };
             return _context.abrupt("return", error);
 
-          case 14:
+          case 16:
           case "end":
             return _context.stop();
         }
@@ -102,10 +99,17 @@ function () {
     }, _callee, this);
   }));
 
-  return function normalizeError(_x, _x2, _x3, _x4) {
+  return function normalizeError(_x, _x2, _x3) {
     return _ref.apply(this, arguments);
   };
 }();
+/**
+ *
+ * @param err - The runtime error object
+ * @param sourcemap - The sourcemap from the transform
+ * @param functionId - The id of the wrapped function used to execute the code
+ */
+
 
 exports.normalizeError = normalizeError;
 
@@ -132,7 +136,7 @@ function () {
             return _sourceMap.SourceMapConsumer.with(sourcemap, null, function (consumer) {
               var pos = consumer.originalPositionFor({
                 line: 1,
-                column: errorPosition.column - 1
+                column: +errorPosition.column - 1
               });
               return pos;
             });
@@ -151,29 +155,32 @@ function () {
     }, _callee2, this);
   }));
 
-  return function getOriginalErrorPosition(_x5, _x6, _x7) {
+  return function getOriginalErrorPosition(_x4, _x5, _x6) {
     return _ref2.apply(this, arguments);
   };
 }();
 /**
  * Returns the line error for the function id regex
- * @param  {String} stack - an error stack
- * @param  {String} functionId - The name of the function, should be as unique as possible
- * @return {String|null}
+ * @param stack - an error stack
+ * @param functionId - The name of the function, should be as unique as possible
  */
 
 
 exports.getOriginalErrorPosition = getOriginalErrorPosition;
 
 function getErrorLineFromStack(stack, functionId) {
+  if (stack == null) {
+    return null;
+  }
+
   var lines = stack.split(/\r\n|[\r\n]/);
   var regExp = new RegExp(functionId);
 
   for (var i = 0; i < lines.length; i++) {
-    var _line = lines[i];
+    var line = lines[i];
 
-    if (regExp.test(_line)) {
-      return _line;
+    if (regExp.test(line)) {
+      return line;
     }
   }
 
@@ -181,26 +188,24 @@ function getErrorLineFromStack(stack, functionId) {
 }
 
 var getErrorPositionFromStack = function getErrorPositionFromStack(lineText) {
-  var lineOffset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-  var columnOffset = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
   if (typeof lineText !== 'string') {
-    return null;
+    return {
+      line: null,
+      column: null
+    };
   }
 
   var match = lineText.match(/(\d+):(\d+)\)?$/);
 
   if (match == null || !(match.hasOwnProperty(1) && match.hasOwnProperty(2))) {
-    return null;
+    return {
+      line: null,
+      column: null
+    };
   }
 
-  var line = Number(match[1]) + lineOffset;
-  var column = Number(match[2]) + columnOffset;
-
-  if ((0, _isNan.default)(line)) {
-    return null;
-  }
-
+  var line = Number(match[1]);
+  var column = Number(match[2]);
   return {
     line: line,
     column: column
