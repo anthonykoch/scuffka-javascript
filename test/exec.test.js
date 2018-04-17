@@ -1,10 +1,12 @@
+// @flow
+
 import test from 'ava';
 
 // import { run } from '../lib/transform';
 
 test.skip('exec.run() - executes js code and runs a callback for each expression', async t => {
-  t.end();
-
+  t.is(1,2);
+  
   // const functionId = 'LivelyJS';
   // const env = 'browser';
 

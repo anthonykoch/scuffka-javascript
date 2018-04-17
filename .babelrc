@@ -4,10 +4,10 @@
       "targets": {
         "node": "current"
       }
-    }]
+    }],
+    "@babel/preset-flow",
   ],
   "plugins": [
-    "@babel/plugin-proposal-optional-chaining",
     "@babel/plugin-proposal-object-rest-spread",
     ["@babel/plugin-transform-runtime", { "babel-polyfill": false, "regenerator": true, }]
   ]

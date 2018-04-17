@@ -7,4 +7,8 @@ env:
 parserOptions:
   sourceType: module
   ecmaVersion: 8
-extends: ['eslint:recommended']
+extends: [
+  'plugin:flowtype/recommended',
+  'eslint:recommended'
+]
+plugins: ['flowtype']

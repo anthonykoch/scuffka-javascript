@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = exports.isCallable = exports.isLiteral = exports.isUnaryVoid = exports.isCall = exports.isSymbol = exports.isNaN = exports.isUndefined = exports.isIdentifier = exports.isConsoleLog = void 0;
+exports.thorough = exports.minimal = exports.isCallable = exports.isLiteral = exports.isUnaryVoid = exports.isCall = exports.isSymbol = exports.isNaN = exports.isUndefined = exports.isIdentifier = exports.isConsoleLog = void 0;
 
 var _symbol = _interopRequireDefault(require("@babel/runtime/core-js/symbol"));
 
@@ -14,7 +14,7 @@ var _constants = require("./constants");
 // Keep in mind
 // https://github.com/latentflip/loupe/blob/master/lib/instrument-code.js
 // https://github.com/istanbuljs/istanbuljs/blob/master/packages/istanbul-lib-instrument/src/visitor.js
-var IGNORE = (0, _symbol.default)();
+var IGNORE = (0, _symbol.default)('IGNORE');
 
 var isIgnored = function isIgnored(node) {
   return node.hasOwnProperty(IGNORE);
@@ -29,12 +29,7 @@ function ignore(first) {
 }
 
 var isConsoleLog = function isConsoleLog(expr) {
-  var _expr$callee, _expr$callee2, _expr$callee2$object, _expr$callee3, _expr$callee3$propert;
-
-  return expr.type === 'CallExpression' && // eslint-disable-next-line no-undef
-  ((_expr$callee = expr.callee) === null || _expr$callee === void 0 ? void 0 : _expr$callee.type) === 'MemberExpression' && // eslint-disable-next-line no-undef
-  ((_expr$callee2 = expr.callee) === null || _expr$callee2 === void 0 ? void 0 : (_expr$callee2$object = _expr$callee2.object) === null || _expr$callee2$object === void 0 ? void 0 : _expr$callee2$object.name) === 'console' && // eslint-disable-next-line no-undef
-  ((_expr$callee3 = expr.callee) === null || _expr$callee3 === void 0 ? void 0 : (_expr$callee3$propert = _expr$callee3.property) === null || _expr$callee3$propert === void 0 ? void 0 : _expr$callee3$propert.name) === 'log';
+  return expr.type === 'CallExpression' && expr.callee && expr.callee.type === 'MemberExpression' && expr.callee.object && expr.callee.object.name === 'console' && expr.callee.property && expr.callee.property.name === 'log';
 };
 
 exports.isConsoleLog = isConsoleLog;
@@ -58,9 +53,7 @@ var isNaN = function isNaN(expr) {
 exports.isNaN = isNaN;
 
 var isSymbol = function isSymbol(node) {
-  var _node$callee;
-
-  return node.type === 'CallExpression' && ((_node$callee = node.callee) === null || _node$callee === void 0 ? void 0 : _node$callee.name) === 'Symbol';
+  return node.type === 'CallExpression' && node.callee && node.callee.name === 'Symbol';
 };
 
 exports.isSymbol = isSymbol;
@@ -94,15 +87,24 @@ var isCallable = function isCallable(_ref) {
   var type = _ref.type;
   return type === 'ClassExpression' || type === 'FunctionExpression' || type === 'ArrowFunctionExpression';
 };
+/**
+ * Transforms an AST to track a minimal amount of expressions. This transform
+ * attempts to insert as few insertions as possible for better performance.
+ *
+ * @param  {babel.types} options.types t
+ * @param  {Object} options.ast
+ * @param  {Function} options.traverse - The babel traverser function
+ * @return {Object} Returns the insertions and bad loops
+ */
+
 
 exports.isCallable = isCallable;
 
-var _default = function _default(_ref2) {
+var minimal = function minimal(_ref2) {
   var t = _ref2.types,
       ast = _ref2.ast,
       traverse = _ref2.traverse;
   var insertions = [];
-  var badLoops = [];
   var id = -1;
 
   var addInsertionPoint = function addInsertionPoint(node) {
@@ -162,14 +164,6 @@ var _default = function _default(_ref2) {
     },
     ForStatement: function ForStatement(path) {
       path.node.test = track(path.node.test, true, 'ForStatement.test');
-
-      if (path.node.update == null || path.node.test == null) {
-        badLoops.push({
-          type: path.node.type,
-          loc: path.node.loc,
-          position: path.node.position
-        });
-      }
     },
     ForOfStatement: function ForOfStatement(path) {
       path.node.right = track(path.node.right, false, 'ForOfStatement');
@@ -177,14 +171,6 @@ var _default = function _default(_ref2) {
     DoWhileStatement: function DoWhileStatement(path) {
       var test = path.node.test;
       path.node.test = track(path.node.test, false, 'DoWhileStatement');
-
-      if (test && test.value === true) {
-        badLoops.push({
-          type: test.type,
-          loc: test.loc,
-          position: test.position
-        });
-      }
     },
     WhileStatement: function WhileStatement(path) {
       path.node.test = track(path.node.test, true, 'WhileStatement');
@@ -236,9 +222,220 @@ var _default = function _default(_ref2) {
   };
   traverse(ast, visitors);
   return {
-    insertions: insertions,
-    badLoops: badLoops
+    insertions: insertions
+  };
+};
+/**
+ * Transforms an AST to track all expressions. This is terribly bad for performance
+ * and should only be used for small scripts where performance is not necessary.
+ *
+ * @param  {babel.types} options.types t
+ * @param  {Object} options.ast
+ * @param  {Function} options.traverse - The babel traverser function
+ * @return {Object} Returns the insertions and bad loops
+ */
+
+
+exports.minimal = minimal;
+
+var thorough = function thorough(_ref3) {
+  var t = _ref3.types,
+      ast = _ref3.ast,
+      traverse = _ref3.traverse;
+  var insertions = [];
+  var id = -1;
+
+  var addInsertionPoint = function addInsertionPoint(node, context) {
+    id += 1;
+    insertions.push({
+      context: context,
+      node: node,
+      id: id
+    });
+    return id;
+  };
+
+  var track = function track(node, context) {
+    // console.log(node, context)
+    if (isInstrumented(node)) {
+      return node;
+    }
+
+    var insertionId = addInsertionPoint(node, true, context); // console.log('is', node.type, isLiteral(node) || isCallable(node))
+
+    if (node.type === 'CallExpression' && node.callee.type === 'Identifier') {
+      var _number = t.numericLiteral(0); // Fixes an issue where a call expression that has an undeclared identifier
+      // creates a stack trace with incorrect line/column
+
+
+      node.callee = t.sequenceExpression([_number, t.identifier(node.callee.name)]);
+      ignore(node.callee, _number);
+    }
+
+    var name = t.identifier(_constants.VAR_INSPECT);
+    var number = t.numericLiteral(insertionId);
+    var call = t.callExpression(name, [number, node]);
+    ignore(call, name, number);
+    return call;
+  };
+
+  var isInstrumented = function isInstrumented(node) {
+    console.log(node);
+
+    if (node.hasOwnProperty(IGNORE)) {
+      return true;
+    } else if (node.type === 'CallExpression' && node.callee && node.callee.type === 'Identifier' && node.callee.name === _constants.VAR_INSPECT) {
+      return true;
+    } else if (node.type === 'Identifier' && node.name === _constants.VAR_INSPECT) {
+      return true;
+    }
+
+    return false;
+  };
+
+  var trackStatement = function trackStatement(node) {
+    var context = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+    if (isInstrumented(node)) {
+      return node;
+    }
+
+    var insertionId = addInsertionPoint(node, true, context);
+    var name = t.identifier(_constants.VAR_INSPECT);
+    var number = t.numericLiteral(insertionId);
+    var call = t.callExpression(name, [number, node]);
+    var expressionStatement = t.expressionStatement(call);
+    ignore(expressionStatement, call, name, number);
+    return call;
+  };
+
+  var trackProp = function trackProp(prop, type) {
+    return function (path) {
+      return path.node[prop] = track(path.node[prop], typeof type === 'string' ? type : path.node.type);
+    };
+  };
+
+  var trackRight = trackProp('right');
+  var trackLeft = trackProp('left');
+  var trackTest = trackProp('test');
+
+  var trackSelf = function trackSelf(path) {
+    if (!isInstrumented(path.parent)) {
+      path.replaceWith(track(path.node, path.parent.type));
+    }
+  };
+
+  var trackArgument = function trackArgument(path) {
+    if (path.node.argument != null && !isInstrumented(path.node.argument)) {
+      path.node.argument = track(path.node.argument, path.node.type);
+    }
+  };
+
+  var trackBefore = function trackBefore() {
+    return function () {
+      path.insertBefore(trackStatement(path.node, path.node.type));
+    };
+  };
+
+  var visitors = {
+    Literal: function Literal(path) {
+      if (!isInstrumented(path.parent)) {
+        path.replaceWith(track(path.node, path.parent.type)); // return console.log(path.node.value);
+      }
+    },
+    MemberExpression: function MemberExpression(path) {
+      if (path.node.property.computed) {
+        path.node.property.expression = track(path.node.property.expression, path.node.property.type);
+      }
+
+      if (!isInstrumented(path.node.object)) {
+        path.node.object = track(path.node.object, path.node.type);
+      }
+
+      if (!isInstrumented(path.parent)) {
+        path.replaceWith(track(path.node, path.parent.type));
+      }
+    },
+    ReturnStatement: function ReturnStatement(path) {
+      if (path.node.argument != null && !isInstrumented(path.node.argument)) {
+        path.node.argument = track(path.node.argument, 'ReturnStatement');
+      }
+    },
+    BreakStatement: trackBefore,
+    ContinueStatement: trackBefore,
+    ForStatement: function ForStatement(path) {
+      path.node.test = track(path.node.test, 'ForStatement.test');
+      path.node.update = track(path.node.update, 'ForStatement.update');
+    },
+    ForOfStatement: trackRight,
+    DoWhileStatement: trackTest,
+    WhileStatement: trackTest,
+    IfStatement: trackTest,
+    SwitchCase: trackTest,
+    SwitchStatement: function SwitchStatement(path) {
+      path.node.discriminant = track(path.node.discriminant, 'SwitchStatement');
+    },
+    LogicalExpression: function LogicalExpression(path) {
+      path.node.left = track(path.node.left, 'LogicalExpression');
+      path.node.right = track(path.node.right, 'LogicalExpression');
+    },
+    BinaryExpression: function BinaryExpression(path) {
+      path.node.left = track(path.node.left, 'LogicalExpression');
+      path.node.right = track(path.node.right, 'LogicalExpression');
+    },
+    CallExpression: function CallExpression(path) {
+      for (var i = 0; i < path.node.arguments; i++) {
+        path.node.arguments[i] = track(path.node.arguments, 'CallExpression');
+      }
+
+      if (!isInstrumented(path.parent)) {
+        path.replaceWith(track(path.node, path.parent.type));
+      }
+    },
+    ClassExpression: trackSelf,
+    UnaryExpression: trackArgument,
+    ThisExpression: trackSelf,
+    FunctionExpression: trackSelf,
+    ArrowFunctionExpression: trackSelf,
+    ObjectExpression: trackSelf,
+    AwaitExpression: trackArgument,
+    AssignmentExpression: function AssignmentExpression(path) {
+      path.node.right = track(path.node.right, path.node.type);
+
+      if (!isInstrumented(path.parent)) {
+        console.log(path.node == null);
+        path.replaceWith(track(path.node, path.parent.type));
+      }
+    },
+    ArrayExpression: function ArrayExpression(path) {
+      for (var i = 0; i < path.node.elements; i++) {
+        path.node.elements[i] = track(path.node.elements, 'ArrayExpression');
+      }
+
+      path.replaceWith(track(path.node, path.parent.type));
+    },
+    VariableDeclaration: function VariableDeclaration(path) {
+      if (path.parent.type === 'ForStatement') {
+        return;
+      }
+
+      var node = path.node;
+      var length = node.declarations.length;
+
+      for (var i = 0; i < length; i++) {
+        var declaration = node.declarations[i];
+        var init = declaration.init;
+
+        if (init != null) {
+          declaration.init = track(init, 'VariableDeclaration');
+        }
+      }
+    }
+  };
+  traverse(ast, visitors);
+  return {
+    insertions: insertions
   };
 };
 
-exports.default = _default;
+exports.thorough = thorough;

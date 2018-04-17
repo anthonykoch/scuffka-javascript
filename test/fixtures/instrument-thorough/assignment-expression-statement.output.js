@@ -1,0 +1,12 @@
+$$LE__(0, bar *= $$LE__(1, baz));
+$$LE__(2, bar /= $$LE__(3, baz));
+$$LE__(4, bar %= $$LE__(5, baz));
+$$LE__(6, bar += $$LE__(7, baz));
+$$LE__(8, bar -= $$LE__(9, baz));
+$$LE__(10, bar <<= $$LE__(11, baz));
+$$LE__(12, bar >>= $$LE__(13, baz));
+$$LE__(14, bar >>>= $$LE__(15, baz));
+$$LE__(16, bar &= $$LE__(17, baz));
+$$LE__(18, bar ^= $$LE__(19, baz));
+$$LE__(20, bar |= $$LE__(21, baz));
+$$LE__(22, bar = $$LE__(23, baz));

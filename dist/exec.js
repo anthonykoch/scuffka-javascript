@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createNodeModule = exports.run = exports.envs = exports.nodeExec = exports.browserExec = exports.wrap = exports.FUNCTION_ID = void 0;
+exports.createNodeModule = exports.run = exports.defaultExecutor = exports.executors = exports.nodeExec = exports.browserExec = exports.wrap = exports.FUNCTION_ID = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
@@ -30,11 +30,13 @@ var _utils = require("./utils");
 var FUNCTION_ID = "LIVELY_INSPECT_".concat((0, _random.default)(1000000, 1999999));
 exports.FUNCTION_ID = FUNCTION_ID;
 
-var wrap = function wrap(code, args, _ref) {
-  var _ref$id = _ref.id,
+var wrap = function wrap(code, args) {
+  var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+      _ref$id = _ref.id,
       id = _ref$id === void 0 ? '' : _ref$id,
       _ref$closure = _ref.closure,
       closure = _ref$closure === void 0 ? false : _ref$closure;
+
   var parameters = args.map(function (str) {
     return str.replace(/\s/g, '');
   }).join(', ');
@@ -47,7 +49,7 @@ var wrap = function wrap(code, args, _ref) {
   };
 };
 /**
- * Executeds code inside an anonymous function.
+ * Executes code inside an anonymous function.
  *
  * @param  {String} input
  * @param  {Object} options
@@ -138,10 +140,12 @@ function () {
 }();
 
 exports.nodeExec = nodeExec;
-var envs = {
+var executors = {
   node: nodeExec,
   browser: browserExec
 };
+exports.executors = executors;
+var defaultExecutor = browserExec;
 /**
  * Executes input in a a common js style wrapper. The module passed needs two properties,
  * require and exports, which are used to simulate a common js environment. It does not
@@ -166,7 +170,7 @@ var envs = {
  * @param  {Function[]} [notifiers]
  */
 
-exports.envs = envs;
+exports.defaultExecutor = defaultExecutor;
 
 var run =
 /*#__PURE__*/
@@ -174,16 +178,15 @@ function () {
   var _ref4 = (0, _asyncToGenerator2.default)(
   /*#__PURE__*/
   _regenerator.default.mark(function _callee3(input) {
-    var options,
+    var _ref5,
         _module,
         track,
         __filename,
         __dirname,
-        _options$env,
+        _ref5$env,
         env,
-        _options$functionId,
+        _ref5$functionId,
         functionId,
-        _options$sourcemap,
         sourcemap,
         exec,
         error,
@@ -193,11 +196,10 @@ function () {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            options = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : {};
-            _module = options.module, track = options.track, __filename = options.__filename, __dirname = options.__dirname, _options$env = options.env, env = _options$env === void 0 ? 'browser' : _options$env, _options$functionId = options.functionId, functionId = _options$functionId === void 0 ? FUNCTION_ID : _options$functionId, _options$sourcemap = options.sourcemap, sourcemap = _options$sourcemap === void 0 ? null : _options$sourcemap;
-            exec = envs.hasOwnProperty(env) ? envs[env] : browserExec;
-            _context3.prev = 3;
-            _context3.next = 6;
+            _ref5 = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : {}, _module = _ref5.module, track = _ref5.track, __filename = _ref5.__filename, __dirname = _ref5.__dirname, _ref5$env = _ref5.env, env = _ref5$env === void 0 ? 'browser' : _ref5$env, _ref5$functionId = _ref5.functionId, functionId = _ref5$functionId === void 0 ? FUNCTION_ID : _ref5$functionId, sourcemap = _ref5.sourcemap;
+            exec = executors.hasOwnProperty(env) ? executors[env] : defaultExecutor;
+            _context3.prev = 2;
+            _context3.next = 5;
             return exec(input, {
               functionId: functionId,
               filename: __filename,
@@ -214,29 +216,29 @@ function () {
               thisBinding: _module.exports
             });
 
-          case 6:
+          case 5:
             return _context3.abrupt("return", {
               finish: true
             });
 
-          case 9:
-            _context3.prev = 9;
-            _context3.t0 = _context3["catch"](3);
-            _context3.next = 13;
+          case 8:
+            _context3.prev = 8;
+            _context3.t0 = _context3["catch"](2);
+            _context3.next = 12;
             return (0, _utils.normalizeError)(_context3.t0, sourcemap, functionId, env);
 
-          case 13:
+          case 12:
             error = _context3.sent;
             return _context3.abrupt("return", {
               error: error
             });
 
-          case 15:
+          case 14:
           case "end":
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[3, 9]]);
+    }, _callee3, this, [[2, 8]]);
   }));
 
   return function run(_x5) {
