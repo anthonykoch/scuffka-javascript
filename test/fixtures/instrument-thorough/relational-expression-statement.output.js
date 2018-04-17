@@ -1,8 +1,8 @@
-$$LE__(0, bar < baz);
-$$LE__(1, bar > baz);
-$$LE__(2, bar <= baz);
-$$LE__(3, bar >= baz);
-$$LE__(4, bar == baz);
-$$LE__(5, bar != baz);
-$$LE__(6, bar === baz);
-$$LE__(7, bar !== baz);
+$$LE__(0, $$LE__(1, bar) < $$LE__(2, baz));
+$$LE__(3, $$LE__(4, bar) > $$LE__(5, baz));
+$$LE__(6, $$LE__(7, bar) <= $$LE__(8, baz));
+$$LE__(9, $$LE__(10, bar) >= $$LE__(11, baz));
+$$LE__(12, $$LE__(13, bar) == $$LE__(14, baz));
+$$LE__(15, $$LE__(16, bar) != $$LE__(17, baz));
+$$LE__(18, $$LE__(19, bar) === $$LE__(20, baz));
+$$LE__(21, $$LE__(22, bar) !== $$LE__(23, baz));

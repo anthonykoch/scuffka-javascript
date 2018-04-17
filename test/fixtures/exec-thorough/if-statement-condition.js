@@ -1,0 +1,5 @@
+var user = {};
+
+if (user) {
+
+}

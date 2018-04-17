@@ -1,5 +1,4 @@
-switch ($$LE__(0, user.name)) {
-  case $$LE__(1, 'Jonie'):
-    $$LE__(2);
+switch ($$LE__(0, $$LE__(1, user).name)) {
+  case $$LE__(2, 'Jonie'):
     break;
 }

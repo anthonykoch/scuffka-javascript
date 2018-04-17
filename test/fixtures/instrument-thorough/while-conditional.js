@@ -1,3 +1,3 @@
-while (user.name) {
+while (user) {
 
 }
