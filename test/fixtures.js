@@ -31,15 +31,6 @@ export const toTitle = (str: string) =>
     .replace(/\W+|\s+/g, ' ')
     .replace(/^\w|( \w)/g, match => match.toUpperCase());
 
-/**
- * Creates a fixture context, which holds data about the
- *
- * @param {string} inputFilename - The input filename
- * @param {Object} options.comparator - The comparator options
- * @param {Object} options.comparatorReadOptions - The fs.readFile options for comparator files
- * @param {Object} options.inputReadOptions - The fs.readFile optoins for input files
- */
-
  export class FixtureContext {
 
   inputFilename: string;
@@ -99,15 +90,17 @@ export default (pattern: string, options: {
     resolve: (filename: string) => string,
     inputReadOptions?: ReadFileOptions,
     comparatorReadOptions?: ReadFileOptions,
+    globOpts?: {},
   }) => {
   const {
     comparatorReadOptions={},
     inputReadOptions={},
+    globOpts={},
     resolve,
   } = options;
 
   const files =
-    glob.sync(pattern, { ...glob })
+    glob.sync(pattern, { ...globOpts })
       .map(filename =>
           path.isAbsolute(filename)
             ? filename
@@ -128,15 +121,11 @@ export default (pattern: string, options: {
 
   const run = async function (fn: Function, options: { parallel?: boolean }={}) {
     if (options.parallel) {
-      const promises = contexts.map(async (context: FixtureContext) => {
-        const files = context.getFiles();
-
-        await fn(context, files);
-      });
+      const promises =
+        contexts.map(async (context: FixtureContext) => fn(context, context.getFiles()));
 
       return Promise.all(promises);
     }
-
     for (const context of contexts) {
       const files = await context.getFiles();
 
