@@ -2,16 +2,10 @@
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+exports.__esModule = true;
 exports.createNodeModule = exports.run = exports.defaultExecutor = exports.executors = exports.nodeExec = exports.browserExec = exports.wrap = exports.FUNCTION_ID = void 0;
 
-var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
-
-var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
-
-var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+var _promise = _interopRequireDefault(require("@babel/runtime/core-js/promise"));
 
 var _vm = _interopRequireDefault(require("vm"));
 
@@ -28,11 +22,11 @@ var _constants = require("./constants");
 var _utils = require("./utils");
 
 // $FlowFixMe
-var FUNCTION_ID = "LIVELY_INSPECT_".concat((0, _random.default)(1000000, 1999999));
+var FUNCTION_ID = "LIVELY_INSPECT_" + (0, _random.default)(1000000, 1999999);
 exports.FUNCTION_ID = FUNCTION_ID;
 
-var wrap = function wrap(code, args) {
-  var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+var wrap = function wrap(code, args, _temp) {
+  var _ref = _temp === void 0 ? {} : _temp,
       _ref$id = _ref.id,
       id = _ref$id === void 0 ? '' : _ref$id,
       _ref$closure = _ref.closure,
@@ -41,12 +35,12 @@ var wrap = function wrap(code, args) {
   var parameters = args.map(function (str) {
     return str.replace(/\s/g, '');
   }).join(', ');
-  var header = "".concat(closure ? 'return ' : ';', "(function ").concat(id, "(").concat(parameters, ") {");
+  var header = (closure ? 'return ' : ';') + "(function " + id + "(" + parameters + ") {";
   var footer = "});";
   return {
     header: header,
     footer: footer,
-    code: "".concat(header, "\n").concat(code, "\n").concat(footer)
+    code: header + "\n" + code + "\n" + footer
   };
 };
 /**
@@ -60,39 +54,22 @@ var wrap = function wrap(code, args) {
 
 exports.wrap = wrap;
 
-var browserExec =
-/*#__PURE__*/
-function () {
-  var _ref2 = (0, _asyncToGenerator2.default)(
-  /*#__PURE__*/
-  _regenerator.default.mark(function _callee(input, options) {
-    var _options$args, args, _options$parameters, parameters, thisBinding, fn;
+var browserExec = function browserExec(input, options) {
+  var _options$args = options.args,
+      args = _options$args === void 0 ? [] : _options$args,
+      _options$parameters = options.parameters,
+      parameters = _options$parameters === void 0 ? [] : _options$parameters,
+      thisBinding = options.thisBinding; // $FlowFixMe
 
-    return _regenerator.default.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            _options$args = options.args, args = _options$args === void 0 ? [] : _options$args, _options$parameters = options.parameters, parameters = _options$parameters === void 0 ? [] : _options$parameters, thisBinding = options.thisBinding; // $FlowFixMe
+  var fn = Function(wrap(input, parameters, {
+    id: options.functionId,
+    closure: true
+  }).code)(); // console.log(fn.toString());
 
-            fn = Function(wrap(input, parameters, {
-              id: options.functionId,
-              closure: true
-            }).code)(); // console.log(fn.toString());
-
-            return _context.abrupt("return", fn.call.apply(fn, [thisBinding].concat((0, _toConsumableArray2.default)(args))));
-
-          case 3:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee, this);
-  }));
-
-  return function browserExec(_x, _x2) {
-    return _ref2.apply(this, arguments);
-  };
-}();
+  return new _promise.default(function (resolve) {
+    return resolve(fn.call.apply(fn, [thisBinding].concat(args)));
+  });
+};
 /**
  * Executes code in the same environment from where its called.
  *
@@ -104,42 +81,29 @@ function () {
 
 exports.browserExec = browserExec;
 
-var nodeExec =
-/*#__PURE__*/
-function () {
-  var _ref3 = (0, _asyncToGenerator2.default)(
-  /*#__PURE__*/
-  _regenerator.default.mark(function _callee2(input, options) {
-    var filename, _options$args2, args, _options$parameters2, parameters, thisBinding, functionId, wrapper, fn;
+var nodeExec = function nodeExec(input, options) {
+  (0, _assert.default)(options, 'options must be an object');
+  var filename = options.filename,
+      _options$args2 = options.args,
+      args = _options$args2 === void 0 ? [] : _options$args2,
+      _options$parameters2 = options.parameters,
+      parameters = _options$parameters2 === void 0 ? [] : _options$parameters2,
+      thisBinding = options.thisBinding,
+      functionId = options.functionId;
+  var wrapper = wrap(input, parameters, {
+    id: functionId
+  });
 
-    return _regenerator.default.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            (0, _assert.default)(options, 'options must be an object');
-            filename = options.filename, _options$args2 = options.args, args = _options$args2 === void 0 ? [] : _options$args2, _options$parameters2 = options.parameters, parameters = _options$parameters2 === void 0 ? [] : _options$parameters2, thisBinding = options.thisBinding, functionId = options.functionId;
-            wrapper = wrap(input, parameters, {
-              id: functionId
-            });
-            fn = _vm.default.runInThisContext(wrapper.code, {
-              filename: filename,
-              lineOffset: options.lineOffset,
-              columnOffset: options.columnOffset
-            });
-            return _context2.abrupt("return", fn.call.apply(fn, [thisBinding].concat((0, _toConsumableArray2.default)(args))));
+  var fn = _vm.default.runInThisContext(wrapper.code, {
+    filename: filename,
+    lineOffset: options.lineOffset,
+    columnOffset: options.columnOffset
+  });
 
-          case 5:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2, this);
-  }));
-
-  return function nodeExec(_x3, _x4) {
-    return _ref3.apply(this, arguments);
-  };
-}();
+  return new _promise.default(function (resolve) {
+    return resolve(fn.call.apply(fn, [thisBinding].concat(args)));
+  });
+};
 
 exports.nodeExec = nodeExec;
 var executors = {
@@ -174,77 +138,52 @@ var defaultExecutor = browserExec;
 
 exports.defaultExecutor = defaultExecutor;
 
-var run =
-/*#__PURE__*/
-function () {
-  var _ref4 = (0, _asyncToGenerator2.default)(
-  /*#__PURE__*/
-  _regenerator.default.mark(function _callee3(input, options) {
-    var _options$module, _module, track, __filename, __dirname, _options$env, env, _options$functionId, functionId, sourcemap, exec;
+var run = function run(input, options) {
+  var _options$module = options.module,
+      _module = _options$module === void 0 ? {
+    require: function require() {},
+    exports: {}
+  } : _options$module,
+      track = options.track,
+      __filename = options.__filename,
+      __dirname = options.__dirname,
+      _options$env = options.env,
+      env = _options$env === void 0 ? 'browser' : _options$env,
+      _options$functionId = options.functionId,
+      functionId = _options$functionId === void 0 ? FUNCTION_ID : _options$functionId,
+      sourcemap = options.sourcemap;
 
-    return _regenerator.default.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            _options$module = options.module, _module = _options$module === void 0 ? {
-              require: function require() {},
-              exports: {}
-            } : _options$module, track = options.track, __filename = options.__filename, __dirname = options.__dirname, _options$env = options.env, env = _options$env === void 0 ? 'browser' : _options$env, _options$functionId = options.functionId, functionId = _options$functionId === void 0 ? FUNCTION_ID : _options$functionId, sourcemap = options.sourcemap;
-            exec = executors.hasOwnProperty(env) ? executors[env] : defaultExecutor;
-            _context3.prev = 2;
-            _context3.next = 5;
-            return exec(input, {
-              functionId: functionId,
-              filename: __filename,
-              parameters: ['exports', 'require', 'module', '__filename', '__dirname', _constants.VAR_INSPECT],
-              args: [_module.exports, _module.require, _module, __filename, __dirname, function onCoverageNotification(id, value) {
-                var hasValue = arguments.hasOwnProperty(1);
+  var exec = executors.hasOwnProperty(env) ? executors[env] : defaultExecutor;
+  return exec(input, {
+    functionId: functionId,
+    filename: __filename,
+    parameters: ['exports', 'require', 'module', '__filename', '__dirname', _constants.VAR_INSPECT],
+    args: [_module.exports, _module.require, _module, __filename, __dirname, function onCoverageNotification(id, value) {
+      var hasValue = arguments.hasOwnProperty(1);
 
-                if (typeof track === 'function') {
-                  track(id, hasValue, value);
-                }
-
-                return value;
-              }],
-              thisBinding: _module.exports
-            });
-
-          case 5:
-            return _context3.abrupt("return", {
-              finish: true,
-              error: null
-            });
-
-          case 8:
-            _context3.prev = 8;
-            _context3.t0 = _context3["catch"](2);
-            _context3.next = 12;
-            return (0, _utils.normalizeError)(_context3.t0, sourcemap, functionId);
-
-          case 12:
-            _context3.t1 = _context3.sent;
-            return _context3.abrupt("return", {
-              finish: false,
-              error: _context3.t1
-            });
-
-          case 14:
-          case "end":
-            return _context3.stop();
-        }
+      if (typeof track === 'function') {
+        track(id, hasValue, value);
       }
-    }, _callee3, this, [[2, 8]]);
-  }));
 
-  return function run(_x5, _x6) {
-    return _ref4.apply(this, arguments);
-  };
-}();
+      return value;
+    }],
+    thisBinding: _module.exports
+  }).then(function () {
+    return {
+      finish: true,
+      error: null
+    };
+  }).catch(function (err) {
+    return (0, _utils.normalizeError)(err, sourcemap, functionId);
+  }).then(function (error) {
+    return {
+      finish: false,
+      error: error
+    };
+  });
+};
 /**
  * Returns a node module object. Only works inside a node environment.
- *
- * @param file
- * @return {Module}
  */
 
 

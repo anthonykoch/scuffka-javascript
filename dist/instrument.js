@@ -2,12 +2,8 @@
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+exports.__esModule = true;
 exports.thorough = exports.minimal = exports.Insertion = exports.isCallable = exports.isLiteral = exports.isUnaryVoid = exports.isCall = exports.isSymbol = exports.isNaN = exports.isUndefined = exports.isIdentifier = exports.isConsoleLog = void 0;
-
-var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _symbol = _interopRequireDefault(require("@babel/runtime/core-js/symbol"));
 
@@ -104,7 +100,6 @@ var isCallable = function isCallable(_ref) {
 exports.isCallable = isCallable;
 
 var Insertion = function Insertion(id, node, context) {
-  (0, _classCallCheck2.default)(this, Insertion);
   this.id = id;
   this.node = node;
   this.context = context;
@@ -129,9 +124,11 @@ var minimal = function minimal(_ref2) {
   var insertions = [];
   var id = -1;
 
-  var addInsertionPoint = function addInsertionPoint(node) {
-    var isExpression = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-    var context = arguments.length > 2 ? arguments[2] : undefined;
+  var addInsertionPoint = function addInsertionPoint(node, isExpression, context) {
+    if (isExpression === void 0) {
+      isExpression = false;
+    }
+
     id += 1;
     insertions.push({
       type: node.type,
@@ -153,9 +150,11 @@ var minimal = function minimal(_ref2) {
     return statement;
   };
 
-  var track = function track(node) {
-    var forceSequence = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-    var context = arguments.length > 2 ? arguments[2] : undefined;
+  var track = function track(node, forceSequence, context) {
+    if (forceSequence === void 0) {
+      forceSequence = false;
+    }
+
     var insertionId = addInsertionPoint(node, true, context); // console.log('is', node.type, isLiteral(node) || isCallable(node))
 
     if (node.type === 'CallExpression' && node.callee.type === 'Identifier') {

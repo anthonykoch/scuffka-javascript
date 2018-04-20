@@ -4,34 +4,8 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 
 var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-Object.defineProperty(exports, "browserExec", {
-  enumerable: true,
-  get: function get() {
-    return _exec.browserExec;
-  }
-});
-Object.defineProperty(exports, "nodeExec", {
-  enumerable: true,
-  get: function get() {
-    return _exec.nodeExec;
-  }
-});
-Object.defineProperty(exports, "executors", {
-  enumerable: true,
-  get: function get() {
-    return _exec.executors;
-  }
-});
-Object.defineProperty(exports, "run", {
-  enumerable: true,
-  get: function get() {
-    return _exec.run;
-  }
-});
-exports.constants = exports.transform = void 0;
+exports.__esModule = true;
+exports.constants = exports.run = exports.executors = exports.nodeExec = exports.browserExec = exports.transform = void 0;
 
 var constants = _interopRequireWildcard(require("./constants"));
 
@@ -41,5 +15,9 @@ var _transform2 = _interopRequireDefault(require("./transform"));
 
 var _exec = require("./exec");
 
+exports.browserExec = _exec.browserExec;
+exports.nodeExec = _exec.nodeExec;
+exports.executors = _exec.executors;
+exports.run = _exec.run;
 var transform = _transform2.default;
 exports.transform = transform;

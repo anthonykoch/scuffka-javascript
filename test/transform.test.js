@@ -4,7 +4,7 @@ import test from 'ava';
 
 import transform from '../lib/transform';
 
-test('transform()', async t => {
+test('transform()', async (t) => {
   const { code, error } = await transform('a', { filename: 'lively.js' });
 
   t.is(error, null)
