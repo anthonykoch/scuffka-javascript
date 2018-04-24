@@ -4,7 +4,7 @@
 
 # scuffka-javascript
 
-Track coverage and runtime expressions for JavaScript executed in node or the browser.
+Track coverage and runtime expressions for JavaScript executed in node or the browser. It only supports instrumenting the code once. Running it through twice has a high likelihood of causing stackoverflow errors.
 
 
 ## Todo

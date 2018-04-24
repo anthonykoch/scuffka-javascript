@@ -2,4 +2,4 @@
 /test/fixtures/**/*.js
 /dist
 /build
-/flow/
+/flow

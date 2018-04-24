@@ -8,6 +8,10 @@ import generate from '@babel/generator';
 import { normalizeError } from './utils';
 import * as instrument from './instrument';
 
+// class Meme implements MassiveMeme {
+
+// }
+
 /**
  * @param input - The input to transform
  * @param options.filename - The name of the file
@@ -88,6 +92,7 @@ const transform = (
 
       return normalizeError(error, null, null)
         .then((error) => {
+          // $FlowFixMe
           error.stack = err.stack;
 
           return {

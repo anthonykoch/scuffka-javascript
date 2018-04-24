@@ -1,6 +1,6 @@
 // @flow
 
-import { VAR_INSPECT } from './constants';
+import { VAR_INSPECT, VAR_INTERP } from './constants';
 
 // Keep in mind
 // https://github.com/latentflip/loupe/blob/master/lib/instrument-code.js
@@ -215,7 +215,13 @@ export const minimal = ({
     },
 
     ForStatement(path: Path) {
-      path.node.test = track(path.node.test, true, 'ForStatement.test');
+      if (path.node.test != null) {
+        path.node.test = track(path.node.test, true, 'ForStatement.test');
+      }
+
+      if (path.node.update != null) {
+        path.node.update = track(path.node.update, true, 'ForStatement.update');
+      }
     },
 
     ForOfStatement(path: Path) {
@@ -239,7 +245,9 @@ export const minimal = ({
     },
 
     SwitchCase(path: Path) {
-      path.node.test = track(path.node.test, false, 'SwitchCase');
+      if (path.node.test != null) {
+        path.node.test = track(path.node.test, false, 'SwitchCase');
+      }
     },
 
     LogicalExpression(path: Path) {
@@ -326,29 +334,83 @@ export const thorough = ({
     return id;
   };
 
+  let lastLoc = null;
+
+  // const isMemberCallFix = () => {};
+
+  const identifierCallFix = (node) => {
+    // Fixes an issue where a call expression that has an undeclared identifier
+    // creates a stack trace with incorrect line/column
+
+    const number = t.numericLiteral(0);
+    const identifier = t.identifier(node.callee.name);
+    const seq = t.sequenceExpression([number, identifier])
+
+    ignore(seq, identifier, number);
+
+    return seq;
+  };
+
   /**
    * Wraps an expression in a notifier function and returns the
    * notifier function
    */
   const track = (node: Node, context: string): Node => {
-    // console.log(node, context)
+    lastLoc = node && node.loc ? node.loc : lastLoc;
 
-    if (isInstrumented(node)) {
+    // To make debugging easier
+    if (node == null) {
+      // console.log(node, context)
+      console.log(lastLoc)
+    }
+    // console.log(node)
+
+    if (isInstrumented(node) || isIgnored(node)) {
+    // if (isInstrumented(node) || isMemberCallFix(node)) {
       return node;
     }
 
     const insertionId = addInsertionPoint(node, context);
     // console.log('is', node.type, isLiteral(node) || isCallable(node))
 
-    if (node.type === 'CallExpression' && node.callee.type === 'Identifier') {
-      const number = t.numericLiteral(0);
-      const identifier = t.identifier(node.callee.name);
+    if (node.type === 'CallExpression') {
+      if (node.callee.type === 'Identifier') {
+        node.callee = identifierCallFix(node);
+      } else if (node.callee.type === 'MemberExpression') {
+        // Fixes an issue where wrapping a member expression in a call function causes
+        // `this` to be means
+        const interpIdentifier = t.identifier(VAR_INTERP);
+        // THINKME: Is it really necessary to pass on the arguments if we know it's not going
+        // to be a function?
+        const interpCall       = identifierCallFix(t.callExpression(interpIdentifier, []));
+        const assignment       = t.assignmentExpression('=', interpIdentifier, node.callee);
+        const memberIdentifier = t.identifier('call');
+        const member           = t.memberExpression(interpIdentifier, memberIdentifier);
+        const memberCall       = t.callExpression(member, [interpIdentifier, ...node.arguments]);
+        const unary            = t.unaryExpression('typeof', interpIdentifier);
+        const string           = t.stringLiteral('function');
+        const bin              = t.binaryExpression('===', unary, string);
+        const condition        = t.conditionalExpression(bin, memberCall, interpIdentifier);
+        const conditionParen   = t.parenthesizedExpression(condition);
 
-      // Fixes an issue where a call expression that has an undeclared identifier
-      // creates a stack trace with incorrect line/column
-      node.callee = t.sequenceExpression([number, identifier]);
+        const seq = t.sequenceExpression([assignment, condition])
 
-      ignore(node.callee, identifier, number);
+        ignore(
+            string,
+            member,
+            memberCall,
+            memberIdentifier,
+            bin,
+            unary,
+            condition,
+            conditionParen,
+            interpIdentifier,
+            assignment,
+          );
+
+        node = seq;
+        // node.callee = condition;
+      }
     }
 
     const name = t.identifier(VAR_INSPECT);
@@ -440,6 +502,10 @@ export const thorough = ({
     },
 
     ConditionalExpression(path: Path) {
+      if (isIgnored(path.node)) {
+        return;
+      }
+
       path.node.test = track(path.node.test, 'ConditionalExpression.test');
       path.node.consequent = track(path.node.consequent, 'ConditionalExpression.consequent');
       path.node.alternate = track(path.node.alternate, 'ConditionalExpression.alternate');
@@ -467,8 +533,8 @@ export const thorough = ({
     },
 
     MemberExpression(path: Path) {
-      if (path.node.property.computed) {
-        path.node.property.expression = track(path.node.property.expression, 'MemberExpression.property');
+      if (path.node.computed) {
+        path.node.property = track(path.node.property, 'MemberExpression.property');
       }
 
       path.node.object = track(path.node.object, 'MemberExpression.object');
@@ -482,9 +548,21 @@ export const thorough = ({
 
     // ContinueStatement: trackBeforeVisitor,
 
+    ObjectProperty(path: Path) {
+      // ignore string literal object literal keys
+      if (!path.node.computed) {
+        ignore(path.node.key);
+      }
+    },
+
     ForStatement(path: Path) {
-      path.node.test = track(path.node.test, 'ForStatement.test');
-      path.node.update = track(path.node.update, 'ForStatement.update');
+      if (path.node.test != null) {
+        path.node.test = track(path.node.test, 'ForStatement.test');
+      }
+
+      if (path.node.update) {
+        path.node.update = track(path.node.update, 'ForStatement.update');
+      }
     },
 
     ForOfStatement: trackRightVisitor,
@@ -495,7 +573,13 @@ export const thorough = ({
 
     IfStatement: trackTestVisitor,
 
-    SwitchCase: trackTestVisitor,
+    SwitchCase(path: Path) {
+      if (path.node.test == null) {
+        return;
+      }
+
+      trackTest(path);
+    },
 
     SwitchStatement(path: Path) {
       path.node.discriminant = track(path.node.discriminant, 'SwitchStatement')
@@ -532,6 +616,7 @@ export const thorough = ({
     AssignmentExpression(path: Path) {
       path.node.right = track(path.node.right, path.node.type);
 
+      ignore(path.node.left);
       trackSelf(path);
     },
 

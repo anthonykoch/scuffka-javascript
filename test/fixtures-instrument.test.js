@@ -5,7 +5,7 @@ import path from 'path';
 import test, { ExecutionContext } from 'ava';
 
 import createFixtures, { FixtureContext } from './fixtures';
-import transform from '../lib/transform';
+import transform from '../src/transform';
 
 const createInstrumentTest = (
   t: ExecutionContext<any>,

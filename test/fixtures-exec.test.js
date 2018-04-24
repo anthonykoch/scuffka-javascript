@@ -7,8 +7,8 @@ import test, { ExecutionContext } from 'ava';
 import JSON5 from 'json5';
 
 import createFixtures from './fixtures';
-import transform from '../lib/transform';
-import * as exec from '../lib/exec';
+import transform from '../src/transform';
+import * as exec from '../src/exec';
 
 const createExecTest = (
     t: ExecutionContext<any>,

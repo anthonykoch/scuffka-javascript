@@ -9,7 +9,7 @@ import Module from 'module';
 
 import random from 'lodash/random';
 
-import { VAR_INSPECT } from './constants';
+import { VAR_INSPECT, VAR_INTERP } from './constants';
 import { normalizeError } from './utils';
 
 export const FUNCTION_ID = `LIVELY_INSPECT_${random(1000000, 1999999)}`;
@@ -180,6 +180,7 @@ export const run = (input: string, options: {
       '__filename',
       '__dirname',
       VAR_INSPECT,
+      VAR_INTERP,
     ],
     args: [
       _module.exports,
@@ -196,6 +197,7 @@ export const run = (input: string, options: {
 
         return value;
       },
+      undefined,
     ],
     thisBinding: _module.exports,
   })
