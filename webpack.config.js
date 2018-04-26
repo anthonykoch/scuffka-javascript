@@ -3,7 +3,7 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 module.exports = {
   entry: {
-    bundle: ['@babel/polyfill', './lib/index'],
+    bundle: ['@babel/polyfill', './src/index'],
   },
   module: {
     rules: [

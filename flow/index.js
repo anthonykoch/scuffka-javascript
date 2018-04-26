@@ -26,7 +26,7 @@ declare type TransformError = {|
   map: null,
   code: null,
   source: string,
-  error: Object,
+  error: any,
   originalError: Error,
 |};
 

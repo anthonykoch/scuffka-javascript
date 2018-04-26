@@ -2,15 +2,13 @@
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+exports.__esModule = true;
 exports.getErrorLineFromStack = getErrorLineFromStack;
 exports.getErrorPositionFromStack = exports.getOriginalErrorPosition = exports.normalizeError = exports.serialize = void 0;
 
-var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+var _isFinite = _interopRequireDefault(require("@babel/runtime/core-js/number/is-finite"));
 
-var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+var _promise = _interopRequireDefault(require("@babel/runtime/core-js/promise"));
 
 var _util = _interopRequireDefault(require("util"));
 
@@ -20,7 +18,12 @@ var serialize = function serialize(expr) {
   return _util.default.inspect(expr);
 };
 /**
- * This shit is just crazy. I can't even explain it anymore.
+ * This shit is just crazy. I can't even explain it anymore
+ *
+ * TODO: Split into three separate functions that:
+ *       1. handle runtime errors with a sourcemap
+ *       2. handle runtime errors without a sourcemap
+ *       3. Handles transform errors
  *
  * @param err - An error object or mock error object
  * @param sourcemap - a sourcemap object
@@ -30,79 +33,45 @@ var serialize = function serialize(expr) {
 
 exports.serialize = serialize;
 
-var normalizeError =
-/*#__PURE__*/
-function () {
-  var _ref = (0, _asyncToGenerator2.default)(
-  /*#__PURE__*/
-  _regenerator.default.mark(function _callee(err, sourcemap, functionId) {
-    var name, originalLoc, message, _error, loc, error;
+var normalizeError = function normalizeError(err, sourcemap, functionId) {
+  var name = err ? err.name : null;
+  var originalLoc = err ? err.loc : null; // Handle case where a literal is thrown or if there is no stack to parse
+  // or if babel threw an error while parsing, resuling in no sourcemap
 
-    return _regenerator.default.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            name = err ? err.name : null;
-            originalLoc = err ? err.loc : null; // Handle case where a literal is thrown or if there is no stack to parse
-            // or if babel threw an error while parsing, resuling in no sourcemap
+  if (functionId == null || err == null || err.stack == null || sourcemap == null) {
+    // It's possible for err to not be an actual error object, so we use the Error toString
+    // method to create the message.
+    var message = err != null && typeof err.message === 'string' ? Error.prototype.toString.call(err) : String(err);
+    var _error = {
+      name: name,
+      stack: null,
+      loc: originalLoc,
+      message: message,
+      originalMessage: message
+    };
+    return _promise.default.resolve(_error);
+  }
 
-            if (!(functionId == null || err == null || err.stack == null || sourcemap == null)) {
-              _context.next = 6;
-              break;
-            }
-
-            // It's possible for err to not be an actual error object, so we use the Error toString
-            // method to create the message.
-            message = err != null && typeof err.message === 'string' ? Error.prototype.toString.call(err) : String(err);
-            _error = {
-              name: name,
-              stack: null,
-              loc: originalLoc,
-              message: message,
-              originalMessage: message
-            };
-            return _context.abrupt("return", _error);
-
-          case 6:
-            if (!err.loc) {
-              _context.next = 10;
-              break;
-            }
-
-            _context.t0 = err.loc;
-            _context.next = 13;
-            break;
-
-          case 10:
-            _context.next = 12;
-            return getOriginalErrorPosition(err, sourcemap, functionId);
-
-          case 12:
-            _context.t0 = _context.sent;
-
-          case 13:
-            loc = _context.t0;
-            error = {
-              name: name,
-              stack: err.stack,
-              loc: loc,
-              message: err.message,
-              originalMessage: err.message
-            };
-            return _context.abrupt("return", error);
-
-          case 16:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee, this);
-  }));
-
-  return function normalizeError(_x, _x2, _x3) {
-    return _ref.apply(this, arguments);
+  var error = {
+    name: name,
+    stack: err.stack,
+    loc: err.loc,
+    message: err.message,
+    originalMessage: err.message
   };
-}();
+
+  if (err.loc != undefined) {
+    return _promise.default.resolve(error);
+  }
+
+  return getOriginalErrorPosition(err, sourcemap, functionId).then(function (loc) {
+    if ((0, _isFinite.default)(loc.line) && (0, _isFinite.default)(loc.column)) {
+      error.loc = loc;
+    }
+
+    return error;
+  });
+};
 /**
  *
  * @param err - The runtime error object
@@ -113,52 +82,25 @@ function () {
 
 exports.normalizeError = normalizeError;
 
-var getOriginalErrorPosition =
-/*#__PURE__*/
-function () {
-  var _ref2 = (0, _asyncToGenerator2.default)(
-  /*#__PURE__*/
-  _regenerator.default.mark(function _callee2(err, sourcemap, functionId) {
-    var errorLineText, errorPosition;
-    return _regenerator.default.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            errorLineText = getErrorLineFromStack(err.stack, functionId);
-            errorPosition = getErrorPositionFromStack(errorLineText);
+var getOriginalErrorPosition = function getOriginalErrorPosition(err, sourcemap, functionId) {
+  var errorLineText = getErrorLineFromStack(err.stack, functionId);
+  var errorPosition = getErrorPositionFromStack(errorLineText);
 
-            if (!(errorPosition != null)) {
-              _context2.next = 6;
-              break;
-            }
+  if (errorPosition != null) {
+    return _sourceMap.SourceMapConsumer.with(sourcemap, null, function (consumer) {
+      var pos = consumer.originalPositionFor({
+        line: 1,
+        column: +errorPosition.column - 1
+      });
+      return pos;
+    });
+  }
 
-            _context2.next = 5;
-            return _sourceMap.SourceMapConsumer.with(sourcemap, null, function (consumer) {
-              var pos = consumer.originalPositionFor({
-                line: 1,
-                column: +errorPosition.column - 1
-              });
-              return pos;
-            });
-
-          case 5:
-            return _context2.abrupt("return", _context2.sent);
-
-          case 6:
-            return _context2.abrupt("return", null);
-
-          case 7:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2, this);
-  }));
-
-  return function getOriginalErrorPosition(_x4, _x5, _x6) {
-    return _ref2.apply(this, arguments);
-  };
-}();
+  return _promise.default.resolve({
+    line: null,
+    column: null
+  });
+};
 /**
  * Returns the line error for the function id regex
  * @param stack - an error stack

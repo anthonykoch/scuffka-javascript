@@ -1,6 +1,11 @@
 // @flow
 
-import { VAR_INSPECT } from './constants';
+import {
+  VAR_INSPECT,
+  VAR_INTERP,
+  VAR_MEMBER_OBJECT_INTERP,
+  VAR_MEMBER_PROPERTY_INTERP,
+} from './constants';
 
 // Keep in mind
 // https://github.com/latentflip/loupe/blob/master/lib/instrument-code.js
@@ -215,7 +220,13 @@ export const minimal = ({
     },
 
     ForStatement(path: Path) {
-      path.node.test = track(path.node.test, true, 'ForStatement.test');
+      if (path.node.test != null) {
+        path.node.test = track(path.node.test, true, 'ForStatement.test');
+      }
+
+      if (path.node.update != null) {
+        path.node.update = track(path.node.update, true, 'ForStatement.update');
+      }
     },
 
     ForOfStatement(path: Path) {
@@ -239,7 +250,9 @@ export const minimal = ({
     },
 
     SwitchCase(path: Path) {
-      path.node.test = track(path.node.test, false, 'SwitchCase');
+      if (path.node.test != null) {
+        path.node.test = track(path.node.test, false, 'SwitchCase');
+      }
     },
 
     LogicalExpression(path: Path) {
@@ -326,66 +339,111 @@ export const thorough = ({
     return id;
   };
 
+  let lastLoc = null;
+
   /**
    * Wraps an expression in a notifier function and returns the
    * notifier function
    */
   const track = (node: Node, context: string): Node => {
-    // console.log(node, context)
+    lastLoc = node && node.loc ? node.loc : lastLoc;
 
-    if (isInstrumented(node)) {
+    // To make debugging easier
+    // if (node == null) {
+      // console.log(node, context)
+      // console.log(lastLoc)
+    // }
+
+    // console.log(node.type)
+
+    if (isInstrumented(node) || isIgnored(node)) {
       return node;
     }
 
     const insertionId = addInsertionPoint(node, context);
-    // console.log('is', node.type, isLiteral(node) || isCallable(node))
 
-    if (node.type === 'CallExpression' && node.callee.type === 'Identifier') {
-      const number = t.numericLiteral(0);
-      const identifier = t.identifier(node.callee.name);
 
-      // Fixes an issue where a call expression that has an undeclared identifier
-      // creates a stack trace with incorrect line/column
-      node.callee = t.sequenceExpression([number, identifier]);
+    if (node.type === 'CallExpression') {
+      if (node.callee.type === 'Identifier') {
+        node.callee = track(t.identifier(node.callee.name), 'CallExpression');
+      } else if (node.callee.type === 'MemberExpression') {
+        // Fixes an issue where wrapping a member expression in a call function causes
+        // `this` to be means
 
-      ignore(node.callee, identifier, number);
+        const propertyInterpIdentifier = t.identifier(VAR_MEMBER_PROPERTY_INTERP);
+        const objectInterpIdentifier = t.identifier(VAR_MEMBER_OBJECT_INTERP);
+
+        // THINKME: Is it really necessary to pass on the arguments if we know it's not going
+        //          to be a function?
+
+        const objectAssignment         = t.assignmentExpression('=', objectInterpIdentifier, node.callee.object);
+        const objectAssignmentProperty = t.memberExpression(objectAssignment, node.callee.property, node.callee.computed)
+        const propertyAssignment       = t.assignmentExpression('=', propertyInterpIdentifier, objectAssignmentProperty);
+        const interpCall               = t.callExpression(propertyInterpIdentifier, []);
+        const memberIdentifier         = t.identifier('call');
+        const member                   = t.memberExpression(propertyInterpIdentifier, memberIdentifier);
+        const memberCall               = t.callExpression(member, [objectInterpIdentifier, ...node.arguments]);
+        const unary                    = t.unaryExpression('typeof', propertyInterpIdentifier);
+        const string                   = t.stringLiteral('function');
+        const bin                      = t.binaryExpression('===', unary, string);
+        const condition                = t.conditionalExpression(bin, memberCall, interpCall);
+
+        const seq = t.sequenceExpression([propertyAssignment, condition])
+        const paren = t.parenthesizedExpression(seq);
+
+        ignore(
+            string,
+            member,
+            memberCall,
+            memberIdentifier,
+            bin,
+            unary,
+            condition,
+            paren,
+            objectAssignmentProperty,
+            objectAssignment,
+            objectInterpIdentifier,
+            propertyAssignment,
+            propertyInterpIdentifier,
+          );
+
+        node = seq;
+      }
+    } else if (node.type === 'UpdateExpression') {
+      const identifier = t.identifier(VAR_INTERP);
+      const assignment = t.assignmentExpression('=', identifier, node);
+      const number = t.numericLiteral(1);
+
+      const call = createInspectCall(
+          node.prefix
+            ? ignore(
+              t.binaryExpression((node.operator === '--' ? '+' : '-'), identifier, number)
+            )
+            : identifier,
+          insertionId
+        );
+
+      const seq = t.sequenceExpression([assignment, call]);
+
+      ignore(node, seq, number, identifier, assignment);
+
+      return seq;
     }
 
+    return createInspectCall(node, insertionId);
+  };
+
+  const createInspectCall = (node: Node, insertionId: number) => {
     const name = t.identifier(VAR_INSPECT);
     const number = t.numericLiteral(insertionId);
     const call = t.callExpression(name, [number, node]);
 
-    ignore(call, name, number);
-
-    return call;
+    return ignore(call, name, number);
   };
-
-  /**
-   * Tracks an expression statement
-   */
-  // const trackStatement = (node: Node, context: string) => {
-  //   if (isIgnored(node)) {
-  //     return node;
-  //   }
-
-  //   const insertionId = addInsertionPoint(node, context);
-  //   const name = t.identifier(VAR_INSPECT);
-  //   const number = t.numericLiteral(insertionId);
-  //   const call = t.callExpression(name, [number]);
-  //   const expressionStatement = t.expressionStatement(call);
-
-  //   ignore(expressionStatement, call, name, number);
-
-  //   return expressionStatement;
-  // };
 
   const trackProp =
     (prop: string) =>
       (path: Path): void => {
-        // if (path.node[prop] === undefined) {
-        //   console.log(prop, path.node, path.node.type)
-        // }
-
         return path.node[prop] = track(path.node[prop], path.node.type);
       };
 
@@ -415,31 +473,27 @@ export const thorough = ({
     return path.node.argument;
   };
 
-  // const trackBefore = (path: Path): Node => {
-  //   if (isIgnored(path.node)) {
-  //     return;
-  //   }
-
-  //   const statement = trackStatement(path.node, path.node.type);
-
-  //   ignore(path.node);
-
-  //   path.insertBefore(statement);
-  // };
-
-  // const trackBeforeVisitor = (path: Path) => { trackBefore(path); };
-  const trackArgumentVisitor = (path: Path) => { trackArgument(path); };
   const trackRightVisitor = (path: Path) => { trackRight(path); };
   const trackTestVisitor = (path: Path) => { trackTest(path); };
   const trackSelfVisitor = (path: Path) => { trackSelf(path); };
 
   const visitors = {
 
+    Identifier(path) {
+      if (path.isReferencedIdentifier()) {
+        trackSelf(path);
+      }
+    },
+
     Literal(path: Path) {
       trackSelf(path);
     },
 
     ConditionalExpression(path: Path) {
+      if (isIgnored(path.node)) {
+        return;
+      }
+
       path.node.test = track(path.node.test, 'ConditionalExpression.test');
       path.node.consequent = track(path.node.consequent, 'ConditionalExpression.consequent');
       path.node.alternate = track(path.node.alternate, 'ConditionalExpression.alternate');
@@ -467,8 +521,8 @@ export const thorough = ({
     },
 
     MemberExpression(path: Path) {
-      if (path.node.property.computed) {
-        path.node.property.expression = track(path.node.property.expression, 'MemberExpression.property');
+      if (path.node.computed) {
+        path.node.property = track(path.node.property, 'MemberExpression.property');
       }
 
       path.node.object = track(path.node.object, 'MemberExpression.object');
@@ -476,15 +530,25 @@ export const thorough = ({
       trackSelf(path);
     },
 
-    ReturnStatement: trackArgumentVisitor,
+    ReturnStatement(path: Path) {
+      trackArgument(path);
+    },
 
-    // BreakStatement: trackBeforeVisitor,
-
-    // ContinueStatement: trackBeforeVisitor,
+    ObjectProperty(path: Path) {
+      // ignore string literal object literal keys
+      if (!path.node.computed) {
+        ignore(path.node.key);
+      }
+    },
 
     ForStatement(path: Path) {
-      path.node.test = track(path.node.test, 'ForStatement.test');
-      path.node.update = track(path.node.update, 'ForStatement.update');
+      if (path.node.test != null) {
+        path.node.test = track(path.node.test, 'ForStatement.test');
+      }
+
+      if (path.node.update) {
+        path.node.update = track(path.node.update, 'ForStatement.update');
+      }
     },
 
     ForOfStatement: trackRightVisitor,
@@ -495,7 +559,13 @@ export const thorough = ({
 
     IfStatement: trackTestVisitor,
 
-    SwitchCase: trackTestVisitor,
+    SwitchCase(path: Path) {
+      if (path.node.test == null) {
+        return;
+      }
+
+      trackTest(path);
+    },
 
     SwitchStatement(path: Path) {
       path.node.discriminant = track(path.node.discriminant, 'SwitchStatement')
@@ -517,7 +587,11 @@ export const thorough = ({
 
     ClassExpression: trackSelfVisitor,
 
-    UnaryExpression: trackArgumentVisitor,
+    UnaryExpression: trackSelfVisitor,
+
+    UpdateExpression(path: Path) {
+      trackSelf(path);
+    },
 
     ThisExpression: trackSelfVisitor,
 
@@ -527,16 +601,16 @@ export const thorough = ({
 
     ObjectExpression: trackSelfVisitor,
 
-    AwaitExpression: trackArgumentVisitor,
+    AwaitExpression(path: Path) {
+      trackArgument(path);
+      trackSelf(path);
+    },
 
     AssignmentExpression(path: Path) {
       path.node.right = track(path.node.right, path.node.type);
 
+      ignore(path.node.left);
       trackSelf(path);
-    },
-
-    ExpressionStatement(path: Path) {
-      path.node.expression = track(path.node.expression, 'ExpressionStatement');
     },
 
     ArrayExpression(path: Path) {

@@ -2,9 +2,9 @@
 
 import test from 'ava';
 
-import * as utils from '../lib/utils';
-import transform from '../lib/transform';
-import { run } from '../lib/exec';
+import * as utils from '../src/utils';
+import transform from '../src/transform';
+import { run } from '../src/exec';
 
 const MOCK_MODULE = Object.freeze({
   exports: Object.freeze({}),

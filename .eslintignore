@@ -1,5 +1,5 @@
-/lib/testing.js
+/src/testing.js
 /test/fixtures/**/*.js
 /dist
 /build
-/flow/
+/flow

@@ -2,7 +2,7 @@
 
 .DS_Store
 /build
-/lib/testing.js
+/src/testing.js
 /coverage.lcov
 
 # Created by https://www.gitignore.io/api/node,sublimetext,visualstudiocode
