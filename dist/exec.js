@@ -22,7 +22,7 @@ var _constants = require("./constants");
 var _utils = require("./utils");
 
 // $FlowFixMe
-var FUNCTION_ID = "LIVELY_INSPECT_" + (0, _random.default)(1000000, 1999999);
+var FUNCTION_ID = "LJS_FUNC" + (0, _random.default)(1000000, 1999999);
 exports.FUNCTION_ID = FUNCTION_ID;
 
 var wrap = function wrap(code, args, _temp) {

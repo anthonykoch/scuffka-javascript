@@ -16,7 +16,7 @@ import {
 
 import { normalizeError } from './utils';
 
-export const FUNCTION_ID = `LIVELY_INSPECT_${random(1000000, 1999999)}`;
+export const FUNCTION_ID = `LJS_FUNC${random(1000000, 1999999)}`;
 
 export const wrap = (
     code: string,

@@ -309,9 +309,7 @@ var thorough = function thorough(_ref3) {
     var insertionId = addInsertionPoint(node, context);
 
     if (node.type === 'CallExpression') {
-      if (node.callee.type === 'Identifier') {
-        node.callee = track(t.identifier(node.callee.name), 'CallExpression');
-      } else if (node.callee.type === 'MemberExpression') {
+      if (node.callee.type === 'MemberExpression') {
         // Fixes an issue where wrapping a member expression in a call function causes
         // `this` to be means
         var propertyInterpIdentifier = t.identifier(_constants.VAR_MEMBER_PROPERTY_INTERP);
@@ -333,6 +331,8 @@ var thorough = function thorough(_ref3) {
         var paren = t.parenthesizedExpression(seq);
         ignore(string, member, memberCall, memberIdentifier, bin, unary, condition, paren, objectAssignmentProperty, objectAssignment, objectInterpIdentifier, propertyAssignment, propertyInterpIdentifier);
         node = seq;
+      } else {
+        node.callee = track(node.callee, 'CallExpression');
       }
     } else if (node.type === 'UpdateExpression') {
       var identifier = t.identifier(_constants.VAR_INTERP);
