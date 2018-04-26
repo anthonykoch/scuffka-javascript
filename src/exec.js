@@ -211,11 +211,15 @@ export const run = (input: string, options: {
       finish: true,
       error: null,
     }))
-    .catch((err) =>  normalizeError(err, sourcemap, functionId))
-    .then((error) => ({
-      finish: false,
-      error,
-    }));
+    .catch((err) =>
+      normalizeError(err, sourcemap, functionId)
+        .then(error => {
+          return {
+            finish: false,
+            error,
+          };
+        })
+    );
 };
 
 /**

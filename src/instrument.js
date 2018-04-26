@@ -2,6 +2,7 @@
 
 import {
   VAR_INSPECT,
+  VAR_INTERP,
   VAR_MEMBER_OBJECT_INTERP,
   VAR_MEMBER_PROPERTY_INTERP,
 } from './constants';
@@ -348,16 +349,19 @@ export const thorough = ({
     lastLoc = node && node.loc ? node.loc : lastLoc;
 
     // To make debugging easier
-    if (node == null) {
+    // if (node == null) {
       // console.log(node, context)
       // console.log(lastLoc)
-    }
+    // }
+
+    // console.log(node.type)
 
     if (isInstrumented(node) || isIgnored(node)) {
       return node;
     }
 
     const insertionId = addInsertionPoint(node, context);
+
 
     if (node.type === 'CallExpression') {
       if (node.callee.type === 'Identifier') {
@@ -370,7 +374,7 @@ export const thorough = ({
         const objectInterpIdentifier = t.identifier(VAR_MEMBER_OBJECT_INTERP);
 
         // THINKME: Is it really necessary to pass on the arguments if we know it's not going
-        // // to be a function?
+        //          to be a function?
 
         const objectAssignment         = t.assignmentExpression('=', objectInterpIdentifier, node.callee.object);
         const objectAssignmentProperty = t.memberExpression(objectAssignment, node.callee.property, node.callee.computed)
@@ -403,47 +407,43 @@ export const thorough = ({
             propertyInterpIdentifier,
           );
 
-        node.callee.object =
-
         node = seq;
       }
+    } else if (node.type === 'UpdateExpression') {
+      const identifier = t.identifier(VAR_INTERP);
+      const assignment = t.assignmentExpression('=', identifier, node);
+      const number = t.numericLiteral(1);
+
+      const call = createInspectCall(
+          node.prefix
+            ? ignore(
+              t.binaryExpression((node.operator === '--' ? '+' : '-'), identifier, number)
+            )
+            : identifier,
+          insertionId
+        );
+
+      const seq = t.sequenceExpression([assignment, call]);
+
+      ignore(node, seq, number, identifier, assignment);
+
+      return seq;
     }
 
+    return createInspectCall(node, insertionId);
+  };
+
+  const createInspectCall = (node: Node, insertionId: number) => {
     const name = t.identifier(VAR_INSPECT);
     const number = t.numericLiteral(insertionId);
     const call = t.callExpression(name, [number, node]);
 
-    ignore(call, name, number);
-
-    return call;
+    return ignore(call, name, number);
   };
-
-  /**
-   * Tracks an expression statement
-   */
-  // const trackStatement = (node: Node, context: string) => {
-  //   if (isIgnored(node)) {
-  //     return node;
-  //   }
-
-  //   const insertionId = addInsertionPoint(node, context);
-  //   const name = t.identifier(VAR_INSPECT);
-  //   const number = t.numericLiteral(insertionId);
-  //   const call = t.callExpression(name, [number]);
-  //   const expressionStatement = t.expressionStatement(call);
-
-  //   ignore(expressionStatement, call, name, number);
-
-  //   return expressionStatement;
-  // };
 
   const trackProp =
     (prop: string) =>
       (path: Path): void => {
-        // if (path.node[prop] === undefined) {
-        //   console.log(prop, path.node, path.node.type)
-        // }
-
         return path.node[prop] = track(path.node[prop], path.node.type);
       };
 
@@ -473,13 +473,17 @@ export const thorough = ({
     return path.node.argument;
   };
 
-  // const trackBeforeVisitor = (path: Path) => { trackBefore(path); };
-  const trackArgumentVisitor = (path: Path) => { trackArgument(path); };
   const trackRightVisitor = (path: Path) => { trackRight(path); };
   const trackTestVisitor = (path: Path) => { trackTest(path); };
   const trackSelfVisitor = (path: Path) => { trackSelf(path); };
 
   const visitors = {
+
+    Identifier(path) {
+      if (path.isReferencedIdentifier()) {
+        trackSelf(path);
+      }
+    },
 
     Literal(path: Path) {
       trackSelf(path);
@@ -526,11 +530,9 @@ export const thorough = ({
       trackSelf(path);
     },
 
-    ReturnStatement: trackArgumentVisitor,
-
-    // BreakStatement: trackBeforeVisitor,
-
-    // ContinueStatement: trackBeforeVisitor,
+    ReturnStatement(path: Path) {
+      trackArgument(path);
+    },
 
     ObjectProperty(path: Path) {
       // ignore string literal object literal keys
@@ -585,7 +587,11 @@ export const thorough = ({
 
     ClassExpression: trackSelfVisitor,
 
-    UnaryExpression: trackArgumentVisitor,
+    UnaryExpression: trackSelfVisitor,
+
+    UpdateExpression(path: Path) {
+      trackSelf(path);
+    },
 
     ThisExpression: trackSelfVisitor,
 
@@ -595,17 +601,16 @@ export const thorough = ({
 
     ObjectExpression: trackSelfVisitor,
 
-    AwaitExpression: trackArgumentVisitor,
+    AwaitExpression(path: Path) {
+      trackArgument(path);
+      trackSelf(path);
+    },
 
     AssignmentExpression(path: Path) {
       path.node.right = track(path.node.right, path.node.type);
 
       ignore(path.node.left);
       trackSelf(path);
-    },
-
-    ExpressionStatement(path: Path) {
-      path.node.expression = track(path.node.expression, 'ExpressionStatement');
     },
 
     ArrayExpression(path: Path) {

@@ -21,12 +21,12 @@ const createExecTest = (
     resolve: (filename) => filename.replace(/\.js$/, '.output.js'),
   });
 
-  t.plan(fixtures.length * 3);
+  t.plan(fixtures.length * 5);
 
   return run(async (context) => {
     const { input, comparator } = await context.get();
 
-    const output = await transform(input, {
+    let output = await transform(input, {
       filename: 'main.js',
       instrumentor: fixtureOpts.instrumentor,
       generateOpts: {
@@ -41,7 +41,7 @@ const createExecTest = (
 
     let actual = [];
 
-    await exec.run(result.code, {
+    output = await exec.run(result.code, {
       sourcemap: result.map,
       functionId: 'LivelyJS',
       env: 'browser',
@@ -67,13 +67,20 @@ const createExecTest = (
       },
     });
 
+
+    const name = `${folder}/${context.basename}`;
+
     let expected;
+
+    t.is(output.error, null, name);
 
     t.notThrows(() => {
       expected = JSON5.parse(comparator);
     }, context.path);
 
-    t.deepEqual(actual, expected, `${folder}/${context.basename}`);
+    t.not(actual.length, 0, `${name} has more than 1 item`);
+
+    t.deepEqual(actual, expected, name);
   });
 };
 

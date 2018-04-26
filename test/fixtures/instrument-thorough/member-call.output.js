@@ -1,3 +1,3 @@
 $$LE__(0, ($$MP__ = ($$MO__ = $$LE__(1, 'musefan42')).toUpperCase, typeof $$MP__ === "function" ? $$MP__.call($$MO__) : $$MP__()));
-$$LE__(2, ($$MP__ = ($$MO__ = $$LE__(3, 'musefan42')).toUpperCase, typeof $$MP__ === "function" ? $$MP__.call($$MO__, $$LE__(4, 'hey')) : $$MP__()));
-$$LE__(5, ($$MP__ = ($$MO__ = $$LE__(6, ($$MP__ = ($$MO__ = $$LE__(7, 'musefan42')).toUpperCase, typeof $$MP__ === "function" ? $$MP__.call($$MO__, $$LE__(8, 'hey')) : $$MP__()))).slice, typeof $$MP__ === "function" ? $$MP__.call($$MO__, $$LE__(9, 0)) : $$MP__()));
+$$LE__(3, ($$MP__ = ($$MO__ = $$LE__(4, 'musefan42')).toUpperCase, typeof $$MP__ === "function" ? $$MP__.call($$MO__, $$LE__(2, 'hey')) : $$MP__()));
+$$LE__(6, ($$MP__ = ($$MO__ = $$LE__(7, ($$MP__ = ($$MO__ = $$LE__(8, 'musefan42')).toUpperCase, typeof $$MP__ === "function" ? $$MP__.call($$MO__, $$LE__(9, 'hey')) : $$MP__()))).slice, typeof $$MP__ === "function" ? $$MP__.call($$MO__, $$LE__(5, 0)) : $$MP__()));
