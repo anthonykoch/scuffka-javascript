@@ -1,6 +1,10 @@
 // @flow
 
-import { VAR_INSPECT, VAR_INTERP } from './constants';
+import {
+  VAR_INSPECT,
+  VAR_MEMBER_OBJECT_INTERP,
+  VAR_MEMBER_PROPERTY_INTERP,
+} from './constants';
 
 // Keep in mind
 // https://github.com/latentflip/loupe/blob/master/lib/instrument-code.js
@@ -336,21 +340,6 @@ export const thorough = ({
 
   let lastLoc = null;
 
-  // const isMemberCallFix = () => {};
-
-  const identifierCallFix = (node) => {
-    // Fixes an issue where a call expression that has an undeclared identifier
-    // creates a stack trace with incorrect line/column
-
-    const number = t.numericLiteral(0);
-    const identifier = t.identifier(node.callee.name);
-    const seq = t.sequenceExpression([number, identifier])
-
-    ignore(seq, identifier, number);
-
-    return seq;
-  };
-
   /**
    * Wraps an expression in a notifier function and returns the
    * notifier function
@@ -361,39 +350,42 @@ export const thorough = ({
     // To make debugging easier
     if (node == null) {
       // console.log(node, context)
-      console.log(lastLoc)
+      // console.log(lastLoc)
     }
-    // console.log(node)
 
     if (isInstrumented(node) || isIgnored(node)) {
-    // if (isInstrumented(node) || isMemberCallFix(node)) {
       return node;
     }
 
     const insertionId = addInsertionPoint(node, context);
-    // console.log('is', node.type, isLiteral(node) || isCallable(node))
 
     if (node.type === 'CallExpression') {
       if (node.callee.type === 'Identifier') {
-        node.callee = identifierCallFix(node);
+        node.callee = track(t.identifier(node.callee.name), 'CallExpression');
       } else if (node.callee.type === 'MemberExpression') {
         // Fixes an issue where wrapping a member expression in a call function causes
         // `this` to be means
-        const interpIdentifier = t.identifier(VAR_INTERP);
-        // THINKME: Is it really necessary to pass on the arguments if we know it's not going
-        // to be a function?
-        const interpCall       = identifierCallFix(t.callExpression(interpIdentifier, []));
-        const assignment       = t.assignmentExpression('=', interpIdentifier, node.callee);
-        const memberIdentifier = t.identifier('call');
-        const member           = t.memberExpression(interpIdentifier, memberIdentifier);
-        const memberCall       = t.callExpression(member, [interpIdentifier, ...node.arguments]);
-        const unary            = t.unaryExpression('typeof', interpIdentifier);
-        const string           = t.stringLiteral('function');
-        const bin              = t.binaryExpression('===', unary, string);
-        const condition        = t.conditionalExpression(bin, memberCall, interpIdentifier);
-        const conditionParen   = t.parenthesizedExpression(condition);
 
-        const seq = t.sequenceExpression([assignment, condition])
+        const propertyInterpIdentifier = t.identifier(VAR_MEMBER_PROPERTY_INTERP);
+        const objectInterpIdentifier = t.identifier(VAR_MEMBER_OBJECT_INTERP);
+
+        // THINKME: Is it really necessary to pass on the arguments if we know it's not going
+        // // to be a function?
+
+        const objectAssignment         = t.assignmentExpression('=', objectInterpIdentifier, node.callee.object);
+        const objectAssignmentProperty = t.memberExpression(objectAssignment, node.callee.property, node.callee.computed)
+        const propertyAssignment       = t.assignmentExpression('=', propertyInterpIdentifier, objectAssignmentProperty);
+        const interpCall               = t.callExpression(propertyInterpIdentifier, []);
+        const memberIdentifier         = t.identifier('call');
+        const member                   = t.memberExpression(propertyInterpIdentifier, memberIdentifier);
+        const memberCall               = t.callExpression(member, [objectInterpIdentifier, ...node.arguments]);
+        const unary                    = t.unaryExpression('typeof', propertyInterpIdentifier);
+        const string                   = t.stringLiteral('function');
+        const bin                      = t.binaryExpression('===', unary, string);
+        const condition                = t.conditionalExpression(bin, memberCall, interpCall);
+
+        const seq = t.sequenceExpression([propertyAssignment, condition])
+        const paren = t.parenthesizedExpression(seq);
 
         ignore(
             string,
@@ -403,13 +395,17 @@ export const thorough = ({
             bin,
             unary,
             condition,
-            conditionParen,
-            interpIdentifier,
-            assignment,
+            paren,
+            objectAssignmentProperty,
+            objectAssignment,
+            objectInterpIdentifier,
+            propertyAssignment,
+            propertyInterpIdentifier,
           );
 
+        node.callee.object =
+
         node = seq;
-        // node.callee = condition;
       }
     }
 
@@ -476,18 +472,6 @@ export const thorough = ({
 
     return path.node.argument;
   };
-
-  // const trackBefore = (path: Path): Node => {
-  //   if (isIgnored(path.node)) {
-  //     return;
-  //   }
-
-  //   const statement = trackStatement(path.node, path.node.type);
-
-  //   ignore(path.node);
-
-  //   path.insertBefore(statement);
-  // };
 
   // const trackBeforeVisitor = (path: Path) => { trackBefore(path); };
   const trackArgumentVisitor = (path: Path) => { trackArgument(path); };

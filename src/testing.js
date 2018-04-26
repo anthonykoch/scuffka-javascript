@@ -16,14 +16,32 @@ import * as instrument from './instrument';
 // nested computed member expressions f[m[0]]
 
 
+// var $$IN__;
+
+// function $$LE__(id, value) {
+//   console.log(id, value)
+//   return value;
+// }
+
+// console.log('WTF', $$LE__(
+//   0,
+//   (($$IN__ = $$LE__(1, $$LE__(2, "musefan42").toUpperCase)),
+//   typeof $$IN__ === "function" ? $$IN__.call($$IN__) : $$IN__())
+// ))
+
+
+// console.log($$IN__.call())
+// throw 123;
+
+
+
 var input = `
-// throw new Error();
-// console.log(user)
-user.meme.lol('lol')
+
+'musefan42'.toUpperCase();
+// 'musefan42'.toUpperCase('hey');
+// 'musefan42'.toUpperCase('hey').slice(0);
+
 `;
-
-// $$LE__(0, typeof $$LE__(1, memes) === "function" ? 123 : $$LE__(3, $$LE__(2, $$LE__(4, user).meme).lol)());
-
 
 /*
 
@@ -88,7 +106,7 @@ $$LE__(0,
     module: module,
     insertions,
     track(id, hasValue, value) {
-      // console.log(id, hasValue, value)
+      console.log(id, hasValue, value)
       try {
         const item = {
           id,

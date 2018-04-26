@@ -3,13 +3,17 @@
 import vm from 'vm';
 import path from 'path';
 import assert from 'assert';
-
 // $FlowFixMe
 import Module from 'module';
 
 import random from 'lodash/random';
 
-import { VAR_INSPECT, VAR_INTERP } from './constants';
+import {
+  VAR_INSPECT,
+  VAR_MEMBER_OBJECT_INTERP,
+  VAR_MEMBER_PROPERTY_INTERP,
+} from './constants';
+
 import { normalizeError } from './utils';
 
 export const FUNCTION_ID = `LIVELY_INSPECT_${random(1000000, 1999999)}`;
@@ -180,7 +184,8 @@ export const run = (input: string, options: {
       '__filename',
       '__dirname',
       VAR_INSPECT,
-      VAR_INTERP,
+      VAR_MEMBER_OBJECT_INTERP,
+      VAR_MEMBER_PROPERTY_INTERP,
     ],
     args: [
       _module.exports,
@@ -197,6 +202,7 @@ export const run = (input: string, options: {
 
         return value;
       },
+      undefined,
       undefined,
     ],
     thisBinding: _module.exports,

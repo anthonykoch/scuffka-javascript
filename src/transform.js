@@ -8,10 +8,6 @@ import generate from '@babel/generator';
 import { normalizeError } from './utils';
 import * as instrument from './instrument';
 
-// class Meme implements MassiveMeme {
-
-// }
-
 /**
  * @param input - The input to transform
  * @param options.filename - The name of the file

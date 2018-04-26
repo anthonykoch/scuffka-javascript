@@ -1,5 +1,5 @@
 function getUser(id) {
-  return $$LE__(0, $$LE__(3, $$LE__(2, users).findById)($$LE__(1, id)));
+  return $$LE__(0, ($$MP__ = ($$MO__ = $$LE__(1, users)).findById, typeof $$MP__ === "function" ? $$MP__.call($$MO__, $$LE__(2, id)) : $$MP__()));
 }
 
 function getFruit() {
