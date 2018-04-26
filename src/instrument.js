@@ -364,9 +364,7 @@ export const thorough = ({
 
 
     if (node.type === 'CallExpression') {
-      if (node.callee.type === 'Identifier') {
-        node.callee = track(t.identifier(node.callee.name), 'CallExpression');
-      } else if (node.callee.type === 'MemberExpression') {
+      if (node.callee.type === 'MemberExpression') {
         // Fixes an issue where wrapping a member expression in a call function causes
         // `this` to be means
 
@@ -408,6 +406,8 @@ export const thorough = ({
           );
 
         node = seq;
+      } else {
+        node.callee = track(node.callee, 'CallExpression');
       }
     } else if (node.type === 'UpdateExpression') {
       const identifier = t.identifier(VAR_INTERP);
