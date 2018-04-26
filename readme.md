@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/anthonykoch/lively-javascript.svg?branch=master)](https://travis-ci.org/anthonykoch/lively-javascript)
-[![codecov](https://codecov.io/gh/anthonykoch/lively-javascript/branch/master/graph/badge.svg)](https://codecov.io/gh/anthonykoch/lively-javascript)
+[![Build Status](https://travis-ci.org/anthonykoch/scuffka-javascript.svg?branch=master)](https://travis-ci.org/anthonykoch/scuffka-javascript)
+[![codecov](https://codecov.io/gh/anthonykoch/scuffka-javascript/branch/master/graph/badge.svg)](https://codecov.io/gh/anthonykoch/scuffka-javascript)
 
 
 # scuffka-javascript
