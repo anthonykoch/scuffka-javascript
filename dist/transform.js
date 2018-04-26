@@ -81,6 +81,7 @@ var transform = function transform(input, options) {
       message: String(err.message)
     };
     return (0, _utils.normalizeError)(error, null, null).then(function (error) {
+      // $FlowFixMe
       error.stack = err.stack;
       return {
         insertions: null,

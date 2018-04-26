@@ -157,7 +157,7 @@ var run = function run(input, options) {
   return exec(input, {
     functionId: functionId,
     filename: __filename,
-    parameters: ['exports', 'require', 'module', '__filename', '__dirname', _constants.VAR_INSPECT],
+    parameters: ['exports', 'require', 'module', '__filename', '__dirname', _constants.VAR_INSPECT, _constants.VAR_MEMBER_OBJECT_INTERP, _constants.VAR_MEMBER_PROPERTY_INTERP],
     args: [_module.exports, _module.require, _module, __filename, __dirname, function onCoverageNotification(id, value) {
       var hasValue = arguments.hasOwnProperty(1);
 
@@ -166,7 +166,7 @@ var run = function run(input, options) {
       }
 
       return value;
-    }],
+    }, undefined, undefined],
     thisBinding: _module.exports
   }).then(function () {
     return {
@@ -174,12 +174,12 @@ var run = function run(input, options) {
       error: null
     };
   }).catch(function (err) {
-    return (0, _utils.normalizeError)(err, sourcemap, functionId);
-  }).then(function (error) {
-    return {
-      finish: false,
-      error: error
-    };
+    return (0, _utils.normalizeError)(err, sourcemap, functionId).then(function (error) {
+      return {
+        finish: false,
+        error: error
+      };
+    });
   });
 };
 /**
